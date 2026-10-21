@@ -2,6 +2,7 @@
 export const colors = {
   primary: '#ff9f1c', // Main_Color
   primaryDark: '#ea972d', // Tab_bar AI 아이콘 하이라이트
+  primaryDeep: '#c07413', // 스플래시 닫힌 입 선 (Figma 1:322)
   primaryLight: '#ffcc53', // 회원가입 진행 막대 (Figma 1:29)
   surface: '#f6f7f9', // 직무 선택 카드 배경 (Figma btn_step2)
   surfaceSelected: '#fff8ed', // 직무 선택 카드 선택 상태 (Figma 1:269)
