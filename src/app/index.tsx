@@ -1,14 +1,14 @@
-import { Image } from 'expo-image';
-import { router } from 'expo-router';
-import { useEffect, useRef } from 'react';
-import { Animated, Easing, StyleSheet, View } from 'react-native';
+import { Image } from "expo-image";
+import { router } from "expo-router";
+import { useEffect, useRef } from "react";
+import { Animated, Easing, StyleSheet, View } from "react-native";
 
-import { colors, radius } from '@/theme';
+import { colors, radius } from "@/theme";
 
 // Figma에 프로토타입 애니메이션 설정이 없어 임의로 정한 시간/easing (총 약 1.75초)
-const HOLD_CLOSED_MS = 400;
-const OPEN_MS = 550;
-const HOLD_OPEN_MS = 800;
+const HOLD_CLOSED_MS = 500;
+const OPEN_MS = 600;
+const HOLD_OPEN_MS = 1200;
 const OPEN_EASING = Easing.out(Easing.cubic);
 
 // 마스코트 도형 좌표 (그룹 좌상단 = 열린 상태 1:326의 눈 상단 기준, 단위 px)
@@ -45,7 +45,7 @@ export default function Splash() {
     ]);
     // 화면이 사라져 중단되면 finished 가 false 라서 이동하지 않음
     animation.start(({ finished }) => {
-      if (finished) router.replace('/login');
+      if (finished) router.replace("/login");
     });
     return () => animation.stop();
   }, [open]);
@@ -67,12 +67,12 @@ export default function Splash() {
   const lineOpacity = open.interpolate({
     inputRange: [0, 0.3],
     outputRange: [1, 0],
-    extrapolate: 'clamp',
+    extrapolate: "clamp",
   });
   const wordmarkOpacity = open.interpolate({
     inputRange: [0.5, 1],
     outputRange: [0, 1],
-    extrapolate: 'clamp',
+    extrapolate: "clamp",
   });
 
   return (
@@ -99,7 +99,7 @@ export default function Splash() {
         <Animated.View style={[styles.line, { opacity: lineOpacity }]} />
         <Animated.View style={[styles.wordmark, { opacity: wordmarkOpacity }]}>
           <Image
-            source={require('../../assets/newby-wordmark.svg')}
+            source={require("../../assets/newby-wordmark.svg")}
             style={styles.wordmarkImage}
           />
         </Animated.View>
@@ -111,8 +111,8 @@ export default function Splash() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     backgroundColor: colors.white,
   },
   mascot: {
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
     height: MASCOT.height,
   },
   eye: {
-    position: 'absolute',
+    position: "absolute",
     top: MASCOT.eye.open,
     width: MASCOT.eye.size,
     height: MASCOT.eye.size,
@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.black,
   },
   bar: {
-    position: 'absolute',
+    position: "absolute",
     left: 0,
     width: MASCOT.bar.width,
     height: MASCOT.bar.height,
@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
   },
   line: {
-    position: 'absolute',
+    position: "absolute",
     left: MASCOT.line.left,
     top: MASCOT.line.top,
     width: MASCOT.line.width,
@@ -145,14 +145,14 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primaryDeep,
   },
   wordmark: {
-    position: 'absolute',
+    position: "absolute",
     left: MASCOT.wordmark.left,
     top: MASCOT.wordmark.top,
     width: MASCOT.wordmark.width,
     height: MASCOT.wordmark.height,
   },
   wordmarkImage: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
 });
