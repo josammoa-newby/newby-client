@@ -3,7 +3,6 @@ import { router } from 'expo-router';
 import { useEffect, useRef } from 'react';
 import { Animated, StyleSheet, View } from 'react-native';
 
-import { StatusBar } from '@/components';
 import { colors, radius } from '@/theme';
 
 const FADE_MS = 500;
@@ -34,9 +33,6 @@ export default function Splash() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.statusBar}>
-        <StatusBar />
-      </View>
       <Animated.View style={[styles.mascot, { opacity }]}>
         {MASCOT.eye.left.map((left) => (
           <View key={left} style={[styles.eye, { left }]} />
@@ -59,12 +55,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.white,
-  },
-  statusBar: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
   },
   mascot: {
     width: MASCOT.width,
