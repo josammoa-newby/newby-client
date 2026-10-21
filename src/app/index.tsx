@@ -5,7 +5,7 @@ import { Animated, Easing, StyleSheet, View } from "react-native";
 
 import { colors, radius } from "@/theme";
 
-// Figma에 프로토타입 애니메이션 설정이 없어 임의로 정한 시간/easing (총 약 2.2초)
+// Figma에 프로토타입 애니메이션 설정이 없어 임의로 정한 시간/easing (총 약 2.3초)
 const HOLD_CLOSED_MS = 500;
 const OPEN_MS = 600;
 const HOLD_OPEN_MS = 1200;
