@@ -24,6 +24,7 @@ const ICONS = {
 };
 
 // Figma: AI 아이콘(1:99)은 벡터 에셋 없이 도형으로 구성됨
+// 추정값, Figma 비활성 변형 필요: 비활성일 때도 활성과 같은 색(primary)을 그대로 사용 중
 function AiIcon() {
   return (
     <View style={styles.aiIcon}>

@@ -6,7 +6,8 @@ export const spacing = {
   lg: 16,
   xl: 24,
   screenPadding: 16,
-  inputPaddingY: 15,
+  // Figma 입력창 높이 51/54는 테두리(1px)를 안쪽에 포함하므로 RN에서는 15 - 1 = 14
+  inputPaddingY: 14,
   buttonPaddingY: 16,
 } as const;
 
