@@ -3,6 +3,7 @@ export const colors = {
   primary: '#ff9f1c', // Main_Color
   primaryDark: '#ea972d', // Tab_bar AI 아이콘 하이라이트
   white: '#ffffff',
+  black: '#000000', // 스플래시 마스코트 눈 (Figma 1:326)
   line: '#eceef2', // line_Color
   textPrimary: '#17171c',
   textBody: '#262626',
