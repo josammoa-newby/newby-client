@@ -11,6 +11,21 @@ export const spacing = {
   buttonPaddingY: 16,
 } as const;
 
+// Figma 로그인(1:174) 요소 사이 세로 간격 (절대 좌표에서 계산)
+export const layout = {
+  logoTop: 40, // 상태바(54) 하단 ~ 로고 상단 (94)
+  logoToTitle: 20,
+  titleToForm: 40,
+  fieldGap: 30,
+  fieldToOptions: 10,
+  optionsToButton: 53,
+  buttonToLinks: 14,
+  linksToDivider: 33,
+  dividerToSocial: 24,
+  linkGap: 13,
+  socialGap: 22,
+} as const;
+
 export const radius = {
   button: 8,
   input: 14,
@@ -24,4 +39,8 @@ export const size = {
   statusBarHeight: 54,
   tabBarHeight: 85,
   tabItemWidth: 60,
+  logoWidth: 95,
+  logoHeight: 28.34,
+  linkSeparatorHeight: 17,
+  socialButton: 55,
 } as const;
