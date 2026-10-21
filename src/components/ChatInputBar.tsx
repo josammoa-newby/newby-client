@@ -18,6 +18,9 @@ const SEND = {
   dot: { left: 19.55, top: 16.24, size: 4.1972 },
 } as const;
 
+const INPUT_LINE_HEIGHT = typography.chatInput.lineHeight;
+const INPUT_MAX_LINES = 4;
+
 // Figma: AI 입력창 (1:380), 결과 화면 (1:454)
 export function ChatInputBar({ value, onChangeText, onSubmit, sendDisabled = false }: Props) {
   return (
@@ -31,7 +34,10 @@ export function ChatInputBar({ value, onChangeText, onSubmit, sendDisabled = fal
           placeholder="지금 떠오르는 생각을 적어보세요"
           placeholderTextColor={colors.chatPlaceholder}
           returnKeyType="send"
-          // 전송 후에도 키보드를 유지해 이어서 질문할 수 있게 함
+          // 여러 줄까지 늘어나되, Enter 는 줄바꿈이 아니라 전송으로 처리
+          multiline
+          // 웹(textarea)은 자동으로 높이가 늘지 않아 줄바꿈 수로 줄 수를 지정. 한 줄이면 1
+          rows={Math.min(value.split('\n').length, INPUT_MAX_LINES)}
           submitBehavior="submit"
           style={styles.input}
         />
@@ -77,8 +83,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.chatField,
   },
   input: {
-    ...typography.option,
+    ...typography.chatInput,
+    // 한 줄일 때 49px(Figma 1:383)로 고정되고, 최대 줄 수까지만 늘어남
+    maxHeight: spacing.chatInputPaddingY * 2 + INPUT_LINE_HEIGHT * INPUT_MAX_LINES,
     paddingVertical: spacing.chatInputPaddingY,
+    textAlignVertical: 'center',
+    includeFontPadding: false,
     color: colors.textPrimary,
   },
   send: {

@@ -32,6 +32,8 @@ export const typography = {
   action: { fontFamily: fontFamily.semiBold, fontSize: 14, lineHeight: 21 },
   completeTitle: { fontFamily: fontFamily.semiBold, fontSize: 24, lineHeight: 36 },
   completeBody: { fontFamily: fontFamily.regular, fontSize: 16, lineHeight: 24 },
+  // Figma 1:384: 16px, 줄 높이 19 (입력창 높이 49 = 패딩 15*2 + 19)
+  chatInput: { fontFamily: fontFamily.regular, fontSize: 16, lineHeight: 19 },
   aiHeadline: { fontFamily: fontFamily.bold, fontSize: 24 },
   aiSubline: { fontFamily: fontFamily.semiBold, fontSize: 14 },
   suggestionTitle: { fontFamily: fontFamily.semiBold, fontSize: 16 },
