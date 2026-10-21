@@ -109,8 +109,7 @@ export default function Login() {
           <Button title="로그인" onPress={handleLogin} loading={loading} />
 
           <View style={styles.links}>
-            {/* TODO: 회원가입 화면 연결 (다음 브랜치) */}
-            <Pressable accessibilityRole="link" onPress={() => {}}>
+            <Pressable accessibilityRole="link" onPress={() => router.push('/signup')}>
               <Text style={styles.linkText}>회원가입</Text>
             </Pressable>
             <View style={styles.separator} />
