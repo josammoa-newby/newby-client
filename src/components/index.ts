@@ -1,6 +1,7 @@
 export * from './Button';
 export * from './Checkbox';
 export * from './OptionButton';
+export * from './PlaceholderScreen';
 export * from './SelectCard';
 export * from './SocialButton';
 export * from './StatusBar';
