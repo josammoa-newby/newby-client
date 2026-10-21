@@ -1,4 +1,6 @@
+export * from './AiMascot';
 export * from './Button';
+export * from './ChatInputBar';
 export * from './Checkbox';
 export * from './OptionButton';
 export * from './PlaceholderScreen';

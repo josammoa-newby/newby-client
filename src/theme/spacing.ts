@@ -11,6 +11,9 @@ export const spacing = {
   buttonPaddingY: 16,
   cardPaddingY: 20,
   cardInnerGap: 12,
+  gutter: 20, // AI 화면 헤더·말풍선 좌우 여백
+  chatGap: 15, // AI 대화 요소 사이 세로 간격 (Figma 1:408)
+  chatInputPaddingY: 15,
 } as const;
 
 // Figma 로그인(1:174) 요소 사이 세로 간격 (절대 좌표에서 계산)
@@ -58,6 +61,16 @@ export const radius = {
   card: 16,
   indicator: 3,
   circle: 100,
+  chip: 10, // AI 예시 질문 카드·채팅 입력창
+  aiCard: 20, // AI 결과 카드 (좌상단만 aiCardCorner)
+  aiCardCorner: 6,
+  bubble: 24, // 사용자 질문 말풍선 (우하단만 bubbleCorner)
+  bubbleCorner: 4,
+} as const;
+
+// 비활성 UI 상태 (Figma에 디자인 없음, 임시값)
+export const opacity = {
+  disabled: 0.4,
 } as const;
 
 export const size = {
@@ -79,4 +92,11 @@ export const size = {
   indicatorBarWidth: 28,
   indicatorBarHeight: 5,
   mascot: 250,
+  sendButton: 40,
+  suggestionCardWidth: 225,
+  aiCardMaxWidth: 350,
+  stepBadge: 20,
+  cardStar: 18,
+  aiMascotWidth: 78,
+  aiMascotHeight: 53.06,
 } as const;

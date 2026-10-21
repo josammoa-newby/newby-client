@@ -9,6 +9,13 @@ export const colors = {
   white: '#ffffff',
   black: '#000000', // 스플래시 마스코트 눈 (Figma 1:326)
   line: '#eceef2', // line_Color
+  accent: '#f9a02e', // AI 마스코트·부제 (Figma ai 1:372). primary(#ff9f1c)와 미세하게 다름
+  accentLight: '#ffe500', // AI 마스코트 그라데이션 끝
+  starGold: '#ffc93c', // AI 결과 카드 별 아이콘 (Figma 1:421)
+  chatField: '#f3f3f3', // 채팅 입력창 배경 (Figma 1:383)
+  chatPlaceholder: '#949393', // 채팅 입력창 placeholder (Figma 1:384)
+  bubble: '#eff3f5', // 사용자 질문 말풍선 (Figma 1:451)
+  shadow: 'rgba(23, 23, 28, 0.06)', // AI 결과 카드 그림자 (Figma 1:419)
   textPrimary: '#17171c',
   textBody: '#262626',
   textLabel: '#4b5563',
