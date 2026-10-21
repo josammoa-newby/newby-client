@@ -10,7 +10,7 @@ import { colors, signupLayout, size, spacing, typography } from '@/theme';
 
 export default function SignupComplete() {
   const insets = useSafeAreaInsets();
-  const { form, reset } = useSignup();
+  const { form } = useSignup();
 
   // 가입이 끝났으므로 Android 뒤로가기로 이전 단계에 돌아가지 못하게 막음
   useEffect(() => {
@@ -19,8 +19,11 @@ export default function SignupComplete() {
   }, []);
 
   const handleStart = () => {
-    reset();
+    // dismissAll 은 가장 가까운 스택(signup)만 비우므로, 루트 스택에서 login 까지 되돌린 뒤
+    // login 자리를 home 으로 교체해 login/signup 이 히스토리에 남지 않게 함.
+    // 입력값은 signup 라우트가 제거되며 Context 와 함께 사라짐.
     // Figma에 이동 대상이 없어 임시 홈으로 이동
+    router.dismissTo('/login');
     router.replace('/home');
   };
 
