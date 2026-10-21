@@ -10,9 +10,10 @@ import {
   Text,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { login } from '@/api';
-import { Button, Checkbox, SocialButton, StatusBar, TextField } from '@/components';
+import { Button, Checkbox, SocialButton, TextField } from '@/components';
 import { colors, layout, size, spacing, typography } from '@/theme';
 
 // 에러 문구와 색은 Figma에 없는 임시 디자인 (에러 전용 색 토큰 없음)
@@ -20,6 +21,7 @@ const MESSAGE_EMPTY = '아이디와 비밀번호를 입력해주세요';
 const MESSAGE_FAILED = '로그인에 실패했어요. 잠시 후 다시 시도해주세요';
 
 export default function Login() {
+  const insets = useSafeAreaInsets();
   const [id, setId] = useState('');
   const [password, setPassword] = useState('');
   const [keepSignedIn, setKeepSignedIn] = useState(false);
@@ -44,8 +46,7 @@ export default function Login() {
   };
 
   return (
-    <View style={styles.container}>
-      <StatusBar />
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
