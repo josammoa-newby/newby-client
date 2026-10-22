@@ -32,5 +32,18 @@ export const typography = {
   action: { fontFamily: fontFamily.semiBold, fontSize: 14, lineHeight: 21 },
   completeTitle: { fontFamily: fontFamily.semiBold, fontSize: 24, lineHeight: 36 },
   completeBody: { fontFamily: fontFamily.regular, fontSize: 16, lineHeight: 24 },
+  // Figma 1:384: 16px, 줄 높이 19 (입력창 높이 49 = 패딩 15*2 + 19)
+  chatInput: { fontFamily: fontFamily.regular, fontSize: 16, lineHeight: 19 },
+  aiHeadline: { fontFamily: fontFamily.bold, fontSize: 24 },
+  aiSubline: { fontFamily: fontFamily.semiBold, fontSize: 14 },
+  suggestionTitle: { fontFamily: fontFamily.semiBold, fontSize: 16, lineHeight: 19 },
+  suggestionBody: { fontFamily: fontFamily.medium, fontSize: 14, lineHeight: 17 },
+  cardTitle: { fontFamily: fontFamily.bold, fontSize: 14, lineHeight: 21 },
+  badge: { fontFamily: fontFamily.medium, fontSize: 11, lineHeight: 16.5 },
+  sectionLabel: { fontFamily: fontFamily.bold, fontSize: 13, lineHeight: 19.5 },
+  answerBody: { fontFamily: fontFamily.regular, fontSize: 14, lineHeight: 22.12 },
+  stepNumber: { fontFamily: fontFamily.bold, fontSize: 11, lineHeight: 16.5 },
+  phraseLabel: { fontFamily: fontFamily.bold, fontSize: 12, lineHeight: 18 },
+  disclaimer: { fontFamily: fontFamily.regular, fontSize: 11, lineHeight: 16.5 },
   statusTime: { fontWeight: '600', fontSize: 17, lineHeight: 22 },
 } as const satisfies Record<string, TextStyle>;
