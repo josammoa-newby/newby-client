@@ -22,3 +22,8 @@ export const colors = {
   textMuted: '#8a909a',
   placeholder: '#b4b9c1',
 } as const;
+
+// 왼쪽 → 오른쪽(Figma bg-gradient-to-r) 그라데이션
+export const gradients = {
+  mascot: [colors.accent, colors.accentLight], // AI 마스코트 빵 (Figma 1:374, 1:375)
+} as const;
