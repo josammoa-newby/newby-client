@@ -1,12 +1,12 @@
-import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useEffect } from 'react';
 import { BackHandler, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components';
+import { CompleteMascot } from '@/features/signup/CompleteMascot';
 import { useSignup } from '@/features/signup/SignupContext';
-import { colors, signupLayout, size, spacing, typography } from '@/theme';
+import { colors, signupLayout, spacing, typography } from '@/theme';
 
 export default function SignupComplete() {
   const insets = useSafeAreaInsets();
@@ -41,11 +41,9 @@ export default function SignupComplete() {
         <Text style={styles.body}>
           {'아래 버튼을 눌러서\n뉴비를 시작해보세요!'}
         </Text>
-        <Image
-          source={require('../../../assets/signup/mascot-welcome.png')}
-          contentFit="cover"
-          style={styles.mascot}
-        />
+        <View style={styles.mascot}>
+          <CompleteMascot />
+        </View>
       </View>
       <View style={styles.footer}>
         <Button title="뉴비 시작하기" onPress={handleStart} />
@@ -73,9 +71,6 @@ const styles = StyleSheet.create({
     marginTop: signupLayout.completeTitleToBody,
   },
   mascot: {
-    alignSelf: 'center',
-    width: size.mascot,
-    height: size.mascot,
     marginTop: signupLayout.completeBodyToMascot,
   },
   footer: {
