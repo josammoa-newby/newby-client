@@ -7,7 +7,7 @@ import { Button } from '@/components';
 import { AiPromoCard } from '@/features/home/AiPromoCard';
 import { GreetingBanner } from '@/features/home/GreetingBanner';
 import { HomeHeader } from '@/features/home/HomeHeader';
-import { getHome, markNotificationsRead, submitVote, type HomeData, type VoteChoice } from '@/features/home/mock';
+import { getHome, markNotificationsRead, type HomeData } from '@/features/home/mock';
 import { PopularPostsSection } from '@/features/home/PopularPostsSection';
 import { ShortcutGrid, type ShortcutKey } from '@/features/home/ShortcutGrid';
 import { TipBar } from '@/features/home/TipBar';
@@ -35,21 +35,16 @@ export default function Home() {
     load();
   }, [load]);
 
-  const handleShortcut = (_key: ShortcutKey) => {
-    // TODO: 꾸미기/캘린더/미션/커뮤니티 화면이 아직 없음 — 화면 생기면 연결
-  };
-
-  const handleVote = async (choice: VoteChoice) => {
-    if (!data || data.vote.myChoice) return;
-    // 낙관적 업데이트: 응답 기다리지 않고 먼저 반영, 실패하면 되돌림
-    const previous = data.vote;
-    setData({ ...data, vote: { ...previous, myChoice: choice, totalCount: previous.totalCount + 1 } });
-    try {
-      const { vote } = await submitVote(data.vote.id, choice);
-      setData((prev) => (prev ? { ...prev, vote } : prev));
-    } catch {
-      setData((prev) => (prev ? { ...prev, vote: previous } : prev));
+  const handleShortcut = (key: ShortcutKey) => {
+    if (key === 'calendar') {
+      router.push({ pathname: '/diary', params: { tab: 'calendar' } });
+      return;
     }
+    if (key === 'mission') {
+      router.push({ pathname: '/diary', params: { tab: 'mission' } });
+      return;
+    }
+    // TODO: 꾸미기/커뮤니티 화면이 아직 없음 — 화면 생기면 연결
   };
 
   const handleNotificationPress = () => {
@@ -95,8 +90,7 @@ export default function Home() {
         <VoteSection
           question={data.vote.question}
           totalCount={data.vote.totalCount}
-          myChoice={data.vote.myChoice}
-          onVote={handleVote}
+          onPress={() => router.push('/vote')}
         />
         <PopularPostsSection posts={data.popularPosts} onPressPost={handlePressPost} />
       </ScrollView>

@@ -104,6 +104,12 @@ export async function getHome(): Promise<HomeData> {
 
 const MOCK_VOTE_DELAY_MS = 300;
 
+// 오늘의 투표 화면(/vote) 전용 — 홈과 같은 voteState 를 공유해서 투표 후 홈으로 돌아와도 값이 맞음
+// TODO: 서버 연동 시 내부를 실제 요청으로 교체
+export async function getVote(): Promise<{ vote: HomeVote }> {
+  return delay({ vote: voteState }, MOCK_DELAY_MS);
+}
+
 // TODO: 서버 연동 시 내부를 실제 요청으로 교체
 export async function submitVote(
   voteId: string,

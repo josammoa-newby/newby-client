@@ -1,16 +1,14 @@
 import { Image } from 'expo-image';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { colors, fontFamily, opacity, spacing } from '@/theme';
+import { colors, fontFamily, spacing } from '@/theme';
 import { homeColors, homeLayout } from './constants';
 import { formatVoteCount } from './format';
-import type { VoteChoice } from './mock';
 
 type Props = {
   question: string;
   totalCount: number;
-  myChoice: VoteChoice | null;
-  onVote: (choice: VoteChoice) => void;
+  onPress: () => void;
 };
 
 // Figma: 투표 아이콘 4:278 — 상자(20x20) 위에 -31.73° 기울어진 표시(24x24 에셋)가 겹침
@@ -25,12 +23,10 @@ function VoteTitleIcon() {
   );
 }
 
-// Figma: 오늘의 투표 4:276
-export function VoteSection({ question, totalCount, myChoice, onVote }: Props) {
-  const voted = myChoice !== null;
-
+// Figma: 오늘의 투표 4:276. 홈에서는 미리보기만 — 탭하면 /vote 로 이동해서 거기서 투표한다
+export function VoteSection({ question, totalCount, onPress }: Props) {
   return (
-    <View style={styles.container}>
+    <Pressable accessibilityRole="button" onPress={onPress} style={styles.container}>
       <View style={styles.titleRow}>
         <VoteTitleIcon />
         <Text style={styles.title}>오늘의 투표</Text>
@@ -40,30 +36,13 @@ export function VoteSection({ question, totalCount, myChoice, onVote }: Props) {
           <Text style={styles.question}>{question}</Text>
           <Text style={styles.count}>{`${formatVoteCount(totalCount)}명이 투표했어요!`}</Text>
         </View>
-        <View style={styles.choices}>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="O 선택"
-            accessibilityState={{ selected: myChoice === 'O', disabled: voted }}
-            disabled={voted}
-            onPress={() => onVote('O')}
-            style={voted && myChoice !== 'O' && styles.unselected}
-          >
-            <Image source={require('../../../assets/home/vote-o.svg')} style={styles.choice} />
-          </Pressable>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="X 선택"
-            accessibilityState={{ selected: myChoice === 'X', disabled: voted }}
-            disabled={voted}
-            onPress={() => onVote('X')}
-            style={voted && myChoice !== 'X' && styles.unselected}
-          >
-            <Image source={require('../../../assets/home/vote-x.svg')} style={styles.choice} />
-          </Pressable>
+        {/* 홈에서는 미리보기용 — 실제 투표 버튼은 /vote 화면에 있음 */}
+        <View style={styles.choices} pointerEvents="none">
+          <Image source={require('../../../assets/home/vote-o.svg')} style={styles.choice} />
+          <Image source={require('../../../assets/home/vote-x.svg')} style={styles.choice} />
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -140,8 +119,5 @@ const styles = StyleSheet.create({
   choice: {
     width: homeLayout.voteChoiceWidth,
     height: homeLayout.voteChoiceHeight,
-  },
-  unselected: {
-    opacity: opacity.disabled,
   },
 });
