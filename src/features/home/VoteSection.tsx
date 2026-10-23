@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
   choices: {
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: spacing.cardInnerGap,
+    gap: homeLayout.voteChoiceGap,
   },
   choice: {
     width: homeLayout.voteChoiceWidth,

@@ -24,7 +24,8 @@ export const homeLayout = {
   voteCardRadius: 18,
   voteChoiceWidth: 154,
   voteChoiceHeight: 121,
-  popularTop: 40, // 오늘의 투표 ~ 인기글
+  voteChoiceGap: 20, // O/X 버튼 사이 좌우 여백
+  popularTop: 20, // 오늘의 투표 ~ 인기글
   popularTitleGap: 24,
   postWidth: 263,
   postGap: 15,
