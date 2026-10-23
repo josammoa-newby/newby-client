@@ -46,7 +46,11 @@ export default function Home() {
       router.navigate({ pathname: '/diary', params: { tab: 'mission' } });
       return;
     }
-    // TODO: 꾸미기/커뮤니티 화면이 아직 없음 — 화면 생기면 연결
+    if (key === 'customize') {
+      router.push('/customize');
+      return;
+    }
+    // TODO: 커뮤니티 화면이 아직 없음 — 화면 생기면 연결
   };
 
   const handleNotificationPress = () => {
