@@ -1,9 +1,10 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { signup } from '@/api';
 import { OptionButton, StepIndicator } from '@/components';
+import { authErrorMessage } from '@/features/auth/errorMessage';
 import { SignupLayout } from '@/features/signup/SignupLayout';
 import { useSignup } from '@/features/signup/SignupContext';
 import { BOSS_STYLES } from '@/features/signup/options';
@@ -14,13 +15,16 @@ export default function SignupStep3Boss() {
   const { form, update } = useSignup();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const submitting = useRef(false);
 
   const handleNext = async () => {
+    if (submitting.current) return;
     if (!form.bossStyle) {
       setError('하나를 선택해주세요');
       return;
     }
     setError(null);
+    submitting.current = true;
     setLoading(true);
     try {
       await signup({
@@ -34,8 +38,9 @@ export default function SignupStep3Boss() {
         bossStyle: form.bossStyle,
       });
       router.replace('/signup/complete');
-    } catch {
-      setError('회원가입에 실패했어요. 잠시 후 다시 시도해주세요');
+    } catch (err) {
+      setError(authErrorMessage(err));
+      submitting.current = false;
       setLoading(false);
     }
   };
