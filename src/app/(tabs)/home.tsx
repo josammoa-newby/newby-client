@@ -4,9 +4,10 @@ import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-nat
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components';
+import { AiPromoCard } from '@/features/home/AiPromoCard';
 import { GreetingBanner } from '@/features/home/GreetingBanner';
 import { HomeHeader } from '@/features/home/HomeHeader';
-import { getHome, markNotificationsRead, submitVote, type HomeData, type VoteChoice } from '@/features/home/mock';
+import { getHome, markNotificationsRead, type HomeData } from '@/features/home/mock';
 import { PopularPostsSection } from '@/features/home/PopularPostsSection';
 import { ShortcutGrid, type ShortcutKey } from '@/features/home/ShortcutGrid';
 import { TipBar } from '@/features/home/TipBar';
@@ -35,24 +36,17 @@ export default function Home() {
   }, [load]);
 
   const handleShortcut = (key: ShortcutKey) => {
-    if (key === 'ai') {
-      router.push('/ai');
+    // diary는 탭 화면(싱글 인스턴스)이라 push 대신 navigate를 써야 이미 마운트된 화면의
+    // params가 제대로 갱신됨 (push는 스택에 새로 쌓으려는 의도라 탭 전환에는 안 맞음)
+    if (key === 'calendar') {
+      router.navigate({ pathname: '/diary', params: { tab: 'calendar' } });
       return;
     }
-    // TODO: 캘린더/미션/커뮤니티 화면이 아직 없음 — 화면 생기면 연결
-  };
-
-  const handleVote = async (choice: VoteChoice) => {
-    if (!data || data.vote.myChoice) return;
-    // 낙관적 업데이트: 응답 기다리지 않고 먼저 반영, 실패하면 되돌림
-    const previous = data.vote;
-    setData({ ...data, vote: { ...previous, myChoice: choice, totalCount: previous.totalCount + 1 } });
-    try {
-      const { vote } = await submitVote(data.vote.id, choice);
-      setData((prev) => (prev ? { ...prev, vote } : prev));
-    } catch {
-      setData((prev) => (prev ? { ...prev, vote: previous } : prev));
+    if (key === 'mission') {
+      router.navigate({ pathname: '/diary', params: { tab: 'mission' } });
+      return;
     }
+    // TODO: 꾸미기/커뮤니티 화면이 아직 없음 — 화면 생기면 연결
   };
 
   const handleNotificationPress = () => {
@@ -94,11 +88,11 @@ export default function Home() {
         <GreetingBanner nickname={data.user.nickname} />
         <ShortcutGrid onPress={handleShortcut} />
         <TipBar text={data.tip.text} onPress={() => router.push('/ai')} />
+        <AiPromoCard onPress={() => router.push('/ai')} />
         <VoteSection
           question={data.vote.question}
           totalCount={data.vote.totalCount}
-          myChoice={data.vote.myChoice}
-          onVote={handleVote}
+          onPress={() => router.push('/vote')}
         />
         <PopularPostsSection posts={data.popularPosts} onPressPost={handlePressPost} />
       </ScrollView>

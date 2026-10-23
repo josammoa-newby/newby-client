@@ -4,12 +4,12 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, fontFamily, spacing, typography } from '@/theme';
 import { homeLayout } from './constants';
 
-export type ShortcutKey = 'ai' | 'calendar' | 'mission' | 'community';
+export type ShortcutKey = 'customize' | 'calendar' | 'mission' | 'community';
 
 type Shortcut = { key: ShortcutKey; label: string };
 
 const SHORTCUTS: Shortcut[] = [
-  { key: 'ai', label: '뉴비 AI' },
+  { key: 'customize', label: '꾸미기' },
   { key: 'calendar', label: '캘린더' },
   { key: 'mission', label: '미션' },
   { key: 'community', label: '커뮤니티' },
@@ -19,15 +19,15 @@ type Props = {
   onPress: (key: ShortcutKey) => void;
 };
 
-// Figma: 뉴비 AI 아이콘(4:225)은 벡터 에셋 없이 도형으로 구성됨 (TabBar 의 AiIcon 과 같은 구성, 활성 색)
-function AiShortcutIcon() {
+// Figma: hanger (12:1250) — 옷걸이 모양 1개 + 작은 장식 2개, 벡터 에셋 4개를 겹쳐 구성
+// 퍼센트 inset(Figma)을 40x40 기준 px로 환산한 값
+function CustomizeIcon() {
   return (
     <View style={styles.icon}>
-      <View style={[styles.aiBar, { top: 15.63 }]} />
-      <View style={[styles.aiBar, { top: 23.31 }]} />
-      <View style={styles.aiHighlight} />
-      <View style={[styles.aiEye, { left: 11.57 }]} />
-      <View style={[styles.aiEye, { left: 25.91 }]} />
+      <Image source={require('../../../assets/home/hanger-hook.svg')} style={styles.hangerHook} />
+      <Image source={require('../../../assets/home/hanger-bar.svg')} style={styles.hangerBar} />
+      <Image source={require('../../../assets/home/hanger-mark-1.svg')} style={styles.hangerMark1} />
+      <Image source={require('../../../assets/home/hanger-mark-2.svg')} style={styles.hangerMark2} />
     </View>
   );
 }
@@ -47,8 +47,8 @@ function MissionIcon() {
 
 function ShortcutIcon({ shortcut }: { shortcut: ShortcutKey }) {
   switch (shortcut) {
-    case 'ai':
-      return <AiShortcutIcon />;
+    case 'customize':
+      return <CustomizeIcon />;
     case 'calendar':
       return (
         <Image source={require('../../../assets/home/shortcut-calendar.svg')} style={styles.icon} />
@@ -65,7 +65,7 @@ function ShortcutIcon({ shortcut }: { shortcut: ShortcutKey }) {
   }
 }
 
-// Figma: "바로가기" 4:265 + 타일 4:222
+// Figma: "바로가기" 12:1247 + 타일 12:1248 (타일 테두리 없음, #f6f7f9 배경만)
 export function ShortcutGrid({ onPress }: Props) {
   return (
     <View style={styles.container}>
@@ -118,8 +118,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: homeLayout.tileRadius,
-    borderWidth: 1,
-    borderColor: colors.line,
     backgroundColor: colors.surface,
   },
   label: {
@@ -132,29 +130,34 @@ const styles = StyleSheet.create({
     width: homeLayout.tileIcon,
     height: homeLayout.tileIcon,
   },
-  aiBar: {
+  // 40x40 기준 Figma % inset에서 계산한 위치·크기
+  hangerHook: {
     position: 'absolute',
-    left: 4,
-    width: 33,
-    height: 7.687,
-    borderRadius: 1088,
-    backgroundColor: colors.primary,
+    left: 2,
+    top: 4,
+    width: 29,
+    height: 32,
   },
-  aiHighlight: {
+  hangerBar: {
     position: 'absolute',
-    left: 6.98,
-    top: 23.05,
-    width: 26.508,
-    height: 0.53,
-    backgroundColor: colors.primaryDeep,
+    left: 9,
+    top: 19,
+    width: 15,
+    height: 2,
   },
-  aiEye: {
+  hangerMark1: {
     position: 'absolute',
-    top: 9,
-    width: 3.516,
-    height: 3.446,
-    borderRadius: 1.75,
-    backgroundColor: colors.textPrimary,
+    left: 16,
+    top: 22,
+    width: 25,
+    height: 12,
+  },
+  hangerMark2: {
+    position: 'absolute',
+    left: 25,
+    top: 15,
+    width: 7,
+    height: 9,
   },
   // 40x40 기준 Figma inset 값에서 계산한 위치·크기 (에셋 원본 크기와 동일)
   missionPole: {
@@ -168,7 +171,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 1.584,
     top: 6.06,
-    width: 38.6373,
+    width: 37.9708,
     height: 30.6538,
   },
 });

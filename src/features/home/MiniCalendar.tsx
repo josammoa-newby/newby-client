@@ -1,90 +1,84 @@
 import { StyleSheet, Text, View } from 'react-native';
 
 import { colors, fontFamily } from '@/theme';
+import { homeColors } from './constants';
 
 type Props = {
   date: Date;
 };
 
-const DAYS_PER_WEEK = 7;
+const WEEKDAY_LABELS = ['월', '화', '수', '목', '금', '토', '일'];
 
-function buildWeeks(date: Date): (number | null)[][] {
-  const year = date.getFullYear();
-  const month = date.getMonth();
-  const firstWeekday = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-  const cells: (number | null)[] = [];
-  for (let i = 0; i < firstWeekday; i += 1) cells.push(null);
-  for (let d = 1; d <= daysInMonth; d += 1) cells.push(d);
-  while (cells.length % DAYS_PER_WEEK !== 0) cells.push(null);
-
-  const weeks: (number | null)[][] = [];
-  for (let i = 0; i < cells.length; i += DAYS_PER_WEEK) {
-    weeks.push(cells.slice(i, i + DAYS_PER_WEEK));
-  }
-  return weeks;
+// 오늘이 속한 주의 월~일 날짜 7개
+function getWeekDates(date: Date): Date[] {
+  const day = date.getDay(); // 0=일 ~ 6=토
+  const mondayOffset = day === 0 ? -6 : 1 - day;
+  const monday = new Date(date.getFullYear(), date.getMonth(), date.getDate() + mondayOffset);
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    return d;
+  });
 }
 
-// Figma: 배너 안 미니 캘린더 4:159 (월 라벨 + 7열 날짜, 오늘은 흰 원 + 주황 숫자)
+function isSameDay(a: Date, b: Date) {
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  );
+}
+
+// Figma: 배너 안 미니 캘린더 12:1224. 월~일 요일 pill 7개, 오늘만 흰 배경 + 강조색 텍스트
 export function MiniCalendar({ date }: Props) {
-  const weeks = buildWeeks(date);
-  const today = date.getDate();
-  const monthLabel = date.toLocaleDateString('en-US', { month: 'long' });
+  const weekDates = getWeekDates(date);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.month}>{monthLabel}</Text>
-      {weeks.map((week, i) => (
-        <View key={i} style={styles.week}>
-          {week.map((day, j) => {
-            const isToday = day === today;
-            return (
-              <View key={j} style={[styles.cell, isToday && styles.cellToday]}>
-                {day !== null && (
-                  <Text style={[styles.day, isToday && styles.dayToday]}>{day}</Text>
-                )}
-              </View>
-            );
-          })}
-        </View>
-      ))}
+    <View style={styles.row}>
+      {weekDates.map((d, i) => {
+        const isToday = isSameDay(d, date);
+        return (
+          <View key={i} style={[styles.cell, isToday && styles.cellToday]}>
+            <Text style={[styles.weekday, isToday && styles.textToday]}>{WEEKDAY_LABELS[i]}</Text>
+            <Text style={[styles.dateNum, isToday && styles.textToday]}>{d.getDate()}</Text>
+          </View>
+        );
+      })}
     </View>
   );
 }
 
-const CELL_SIZE = 15.714;
-
 const styles = StyleSheet.create({
-  container: {
-    width: CELL_SIZE * DAYS_PER_WEEK,
-  },
-  month: {
-    fontFamily: fontFamily.semiBold,
-    fontSize: 11.224,
-    lineHeight: 13,
-    color: colors.white,
-  },
-  week: {
+  row: {
     flexDirection: 'row',
+    alignSelf: 'stretch',
+    gap: 6,
   },
   cell: {
-    width: CELL_SIZE,
-    height: CELL_SIZE,
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: CELL_SIZE / 2,
+    gap: 4,
+    paddingVertical: 6,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.18)',
   },
   cellToday: {
     backgroundColor: colors.white,
   },
-  day: {
-    fontFamily: fontFamily.semiBold,
-    fontSize: 6.735,
-    lineHeight: 10,
+  weekday: {
+    fontFamily: fontFamily.regular,
+    fontSize: 11,
+    lineHeight: 14,
     color: colors.white,
   },
-  dayToday: {
-    color: colors.accent,
+  dateNum: {
+    fontFamily: fontFamily.bold,
+    fontSize: 14,
+    lineHeight: 17,
+    color: colors.white,
+  },
+  textToday: {
+    color: homeColors.calendarToday,
   },
 });
