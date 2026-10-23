@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
@@ -14,11 +14,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { login } from '@/api';
 import { Button, Checkbox, SocialButton, TextField } from '@/components';
+import { authErrorMessage } from '@/features/auth/errorMessage';
 import { colors, layout, size, spacing, typography } from '@/theme';
 
 // 에러 문구와 색은 Figma에 없는 임시 디자인 (에러 전용 색 토큰 없음)
 const MESSAGE_EMPTY = '아이디와 비밀번호를 입력해주세요';
-const MESSAGE_FAILED = '로그인에 실패했어요. 잠시 후 다시 시도해주세요';
 
 export default function Login() {
   const insets = useSafeAreaInsets();
@@ -27,20 +27,25 @@ export default function Login() {
   const [keepSignedIn, setKeepSignedIn] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // state 갱신 전에 연속으로 눌러도 중복 요청이 나가지 않게 막는다
+  const submitting = useRef(false);
 
   const handleLogin = async () => {
+    if (submitting.current) return;
     if (!id.trim() || !password) {
       setError(MESSAGE_EMPTY);
       return;
     }
     setError(null);
+    submitting.current = true;
     setLoading(true);
     try {
       // TODO: keepSignedIn(로그인 상태 유지)은 서버 연동 시 api 로 전달
       await login({ id: id.trim(), password });
       router.replace('/home');
-    } catch {
-      setError(MESSAGE_FAILED);
+    } catch (err) {
+      setError(authErrorMessage(err));
+      submitting.current = false;
       setLoading(false);
     }
   };
@@ -69,7 +74,7 @@ export default function Login() {
               label="아이디"
               placeholder="아이디를 입력하세요"
               value={id}
-              onChangeText={setId}
+              onChangeText={(text) => setId(text.toLowerCase())}
               autoCapitalize="none"
               autoCorrect={false}
               editable={!loading}

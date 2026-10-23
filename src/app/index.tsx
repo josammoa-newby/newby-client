@@ -3,6 +3,7 @@ import { router } from "expo-router";
 import { useEffect, useRef } from "react";
 import { Animated, Easing, StyleSheet, View } from "react-native";
 
+import { resolveInitialRoute } from "@/features/auth/session";
 import { colors, radius } from "@/theme";
 
 // Figma에 프로토타입 애니메이션 설정이 없어 임의로 정한 시간/easing (총 약 2.3초)
@@ -44,10 +45,17 @@ export default function Splash() {
       Animated.delay(HOLD_OPEN_MS),
     ]);
     // 화면이 사라져 중단되면 finished 가 false 라서 이동하지 않음
-    animation.start(({ finished }) => {
-      if (finished) router.replace("/login");
+    // 저장된 토큰 확인은 애니메이션이 끝난 뒤에 해서, 만료 시 로그인 이동이 애니메이션을 끊지 않게 함
+    let cancelled = false;
+    animation.start(async ({ finished }) => {
+      if (!finished) return;
+      const route = await resolveInitialRoute();
+      if (!cancelled) router.replace(route);
     });
-    return () => animation.stop();
+    return () => {
+      cancelled = true;
+      animation.stop();
+    };
   }, [open]);
 
   // 열린 위치 기준으로 배치하고, 닫힌 위치에서 열린 위치로 이동
