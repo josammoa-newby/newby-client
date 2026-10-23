@@ -6,8 +6,8 @@ export const diaryColors = {
 } as const;
 
 export const diaryLayout = {
-  headerTop: 16, // 상태바 하단 ~ 로고 상단
-  headerBottom: 17.5, // 로고 하단 ~ 탭 상단
+  headerTop: 20, // 상태바 하단 ~ 로고 상단. 홈 헤더(homeLayout.headerTop)와 위치를 맞춤
+  headerBottom: 13.5, // 로고 하단 ~ 탭 상단. 위쪽을 4 늘린 만큼 줄여서 아래 레이아웃은 Figma 위치 유지
   tabBorder: 2,
   tabToBanner: 12,
   bannerHeight: 90,
