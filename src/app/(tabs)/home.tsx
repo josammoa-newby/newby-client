@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Button } from '@/components';
 import { GreetingBanner } from '@/features/home/GreetingBanner';
 import { HomeHeader } from '@/features/home/HomeHeader';
-import { getHome, markNotificationsRead, submitVote, type HomeData, type VoteChoice } from '@/features/home/mock';
+import { getHome, markNotificationsRead, type HomeData } from '@/features/home/mock';
 import { PopularPostsSection } from '@/features/home/PopularPostsSection';
 import { ShortcutGrid, type ShortcutKey } from '@/features/home/ShortcutGrid';
 import { TipBar } from '@/features/home/TipBar';
@@ -42,18 +42,8 @@ export default function Home() {
     // TODO: 캘린더/미션/커뮤니티 화면이 아직 없음 — 화면 생기면 연결
   };
 
-  const handleVote = async (choice: VoteChoice) => {
-    if (!data || data.vote.myChoice) return;
-    // 낙관적 업데이트: 응답 기다리지 않고 먼저 반영, 실패하면 되돌림
-    const previous = data.vote;
-    setData({ ...data, vote: { ...previous, myChoice: choice, totalCount: previous.totalCount + 1 } });
-    try {
-      const { vote } = await submitVote(data.vote.id, choice);
-      setData((prev) => (prev ? { ...prev, vote } : prev));
-    } catch {
-      setData((prev) => (prev ? { ...prev, vote: previous } : prev));
-    }
-  };
+  // 투표는 오늘의 투표 화면(/vote)에서 한다
+  const handleVote = () => router.push('/vote');
 
   const handleNotificationPress = () => {
     // 알림 화면이 아직 없어 점만 끔. 낙관적 업데이트 (실패해도 다음 로드 때 서버 값으로 맞춰짐)
