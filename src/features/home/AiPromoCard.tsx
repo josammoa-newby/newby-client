@@ -42,7 +42,7 @@ export function AiPromoCard({ onPress }: Props) {
           style={styles.bubbleImage}
         />
         <Text style={styles.bubbleText}>
-          {'직장상사가 ‘다시 한번 검토해보자’ \n라고 했는데 이거 무슨 뜻이야?'}
+          {'직장상사가 ‘다시 한번 검토해보자’\n라고 했는데 이거 무슨 뜻이야?'}
         </Text>
       </View>
     </Pressable>
@@ -109,11 +109,11 @@ const styles = StyleSheet.create({
   bubbleImage: StyleSheet.absoluteFill,
   // theme에 이 회색(#353535) 토큰이 없어 임시로 직접 지정함 (추후 theme 추가 검토)
   bubbleText: {
+    width: '100%',
     fontFamily: fontFamily.medium,
     fontSize: 12,
     lineHeight: 16,
     color: '#353535',
     textAlign: 'center',
-    marginTop: 6,
   },
 });

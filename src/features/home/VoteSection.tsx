@@ -134,6 +134,7 @@ const styles = StyleSheet.create({
   },
   choices: {
     flexDirection: 'row',
+    justifyContent: 'center',
     gap: spacing.cardInnerGap,
   },
   choice: {
