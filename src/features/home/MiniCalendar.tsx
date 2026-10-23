@@ -1,12 +1,11 @@
 import { StyleSheet, Text, View } from 'react-native';
 
-import { colors, radius, typography } from '@/theme';
+import { colors, fontFamily } from '@/theme';
 
 type Props = {
   date: Date;
 };
 
-const WEEKS_MAX = 6;
 const DAYS_PER_WEEK = 7;
 
 function buildWeeks(date: Date): (number | null)[][] {
@@ -24,10 +23,10 @@ function buildWeeks(date: Date): (number | null)[][] {
   for (let i = 0; i < cells.length; i += DAYS_PER_WEEK) {
     weeks.push(cells.slice(i, i + DAYS_PER_WEEK));
   }
-  return weeks.slice(0, WEEKS_MAX);
+  return weeks;
 }
 
-// 인사 배너 안의 미니 캘린더. Figma 디자인 없음 — 임시 구현 (날짜는 하드코딩 없이 계산)
+// Figma: 배너 안 미니 캘린더 4:159 (월 라벨 + 7열 날짜, 오늘은 흰 원 + 주황 숫자)
 export function MiniCalendar({ date }: Props) {
   const weeks = buildWeeks(date);
   const today = date.getDate();
@@ -38,33 +37,33 @@ export function MiniCalendar({ date }: Props) {
       <Text style={styles.month}>{monthLabel}</Text>
       {weeks.map((week, i) => (
         <View key={i} style={styles.week}>
-          {week.map((day, j) => (
-            <View key={j} style={styles.cell}>
-              {day && (
-                <View style={[styles.dayWrap, day === today && styles.dayWrapToday]}>
-                  <Text style={[styles.day, day === today && styles.dayToday]}>{day}</Text>
-                </View>
-              )}
-            </View>
-          ))}
+          {week.map((day, j) => {
+            const isToday = day === today;
+            return (
+              <View key={j} style={[styles.cell, isToday && styles.cellToday]}>
+                {day !== null && (
+                  <Text style={[styles.day, isToday && styles.dayToday]}>{day}</Text>
+                )}
+              </View>
+            );
+          })}
         </View>
       ))}
     </View>
   );
 }
 
-const CELL_SIZE = 16;
+const CELL_SIZE = 15.714;
 
-// theme에 이만큼 작은 폰트 크기·반투명 흰색 토큰이 없어 임시로 직접 지정함 (추후 theme 추가 검토)
 const styles = StyleSheet.create({
   container: {
-    alignItems: 'center',
-    gap: 2,
+    width: CELL_SIZE * DAYS_PER_WEEK,
   },
   month: {
-    ...typography.caption,
+    fontFamily: fontFamily.semiBold,
+    fontSize: 11.224,
+    lineHeight: 13,
     color: colors.white,
-    marginBottom: 2,
   },
   week: {
     flexDirection: 'row',
@@ -74,24 +73,18 @@ const styles = StyleSheet.create({
     height: CELL_SIZE,
     alignItems: 'center',
     justifyContent: 'center',
+    borderRadius: CELL_SIZE / 2,
   },
-  dayWrap: {
-    width: CELL_SIZE,
-    height: CELL_SIZE,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: radius.circle,
-  },
-  dayWrapToday: {
+  cellToday: {
     backgroundColor: colors.white,
   },
   day: {
-    fontSize: 9,
-    lineHeight: 11,
-    color: 'rgba(255,255,255,0.8)',
+    fontFamily: fontFamily.semiBold,
+    fontSize: 6.735,
+    lineHeight: 10,
+    color: colors.white,
   },
   dayToday: {
-    color: colors.primary,
-    fontWeight: '700',
+    color: colors.accent,
   },
 });

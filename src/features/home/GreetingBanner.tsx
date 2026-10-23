@@ -1,23 +1,28 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { colors, gradients, radius, spacing, typography } from '@/theme';
+import { colors, fontFamily, spacing } from '@/theme';
+import { homeLayout } from './constants';
 import { MiniCalendar } from './MiniCalendar';
 
 type Props = {
   nickname: string;
 };
 
-// Figma 디자인 없음 — 임시 구현. 그라데이션은 AiMascot과 같은 토큰(gradients.mascot) 재사용
+// Figma: banner 4:156 (361x159, radius 18, 그라데이션 143.6deg #f9a02e → #ffcc53)
 export function GreetingBanner({ nickname }: Props) {
   return (
     <LinearGradient
-      colors={gradients.mascot}
+      colors={[colors.accent, colors.primaryLight]}
+      locations={[0.1902, 0.77545]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={styles.container}
     >
-      <Text style={styles.greeting}>{`${nickname}님,\n좋은 하루에요`}</Text>
+      <View>
+        <Text style={styles.greeting}>{`${nickname}님, `}</Text>
+        <Text style={[styles.greeting, styles.greetingBold]}>좋은 하루에요</Text>
+      </View>
       <MiniCalendar date={new Date()} />
     </LinearGradient>
   );
@@ -28,14 +33,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'space-between',
+    height: homeLayout.bannerHeight,
     marginHorizontal: spacing.screenPadding,
-    marginTop: spacing.lg,
-    padding: spacing.xl,
-    borderRadius: radius.aiCard,
+    paddingTop: homeLayout.bannerPaddingTop,
+    paddingLeft: homeLayout.bannerPaddingLeft,
+    paddingRight: homeLayout.bannerPaddingRight,
+    borderRadius: homeLayout.bannerRadius,
+    overflow: 'hidden',
   },
   greeting: {
-    ...typography.header,
+    fontFamily: fontFamily.regular,
+    fontSize: 24,
+    lineHeight: 35,
     color: colors.white,
-    flexShrink: 1,
+  },
+  greetingBold: {
+    fontFamily: fontFamily.bold,
   },
 });

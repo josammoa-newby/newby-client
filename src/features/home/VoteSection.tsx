@@ -1,6 +1,8 @@
+import { Image } from 'expo-image';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { colors, radius, spacing, typography } from '@/theme';
+import { colors, fontFamily, opacity, spacing } from '@/theme';
+import { homeColors, homeLayout } from './constants';
 import { formatVoteCount } from './format';
 import type { VoteChoice } from './mock';
 
@@ -11,25 +13,33 @@ type Props = {
   onVote: (choice: VoteChoice) => void;
 };
 
-// theme에 O/X 투표용 파랑·빨강·초록 토큰이 없어 임시로 직접 지정함 (추후 theme 추가 검토)
-const VOTE_BLUE = '#3b82f6';
-const VOTE_BLUE_BG = '#e7f0fe';
-const VOTE_RED = '#ef4444';
-const VOTE_RED_BG = '#fdeaea';
-const VOTE_GREEN = '#2fab66';
-// theme에 맞는 선택 버튼 높이 토큰이 없어 임시로 직접 지정함
-const CHOICE_HEIGHT = 64;
+// Figma: 투표 아이콘 4:278 — 상자(20x20) 위에 -31.73° 기울어진 표시(24x24 에셋)가 겹침
+function VoteTitleIcon() {
+  return (
+    <View style={styles.titleIcon}>
+      <Image source={require('../../../assets/home/vote-icon-box.svg')} style={styles.iconBox} />
+      <View style={styles.iconMarkWrap}>
+        <Image source={require('../../../assets/home/vote-icon-mark.svg')} style={styles.iconMark} />
+      </View>
+    </View>
+  );
+}
 
-// Figma 디자인 없음 — 임시 구현
+// Figma: 오늘의 투표 4:276
 export function VoteSection({ question, totalCount, myChoice, onVote }: Props) {
   const voted = myChoice !== null;
 
   return (
     <View style={styles.container}>
-      <Text style={styles.sectionTitle}>{'🗳️  오늘의 투표'}</Text>
+      <View style={styles.titleRow}>
+        <VoteTitleIcon />
+        <Text style={styles.title}>오늘의 투표</Text>
+      </View>
       <View style={styles.card}>
-        <Text style={styles.question}>{question}</Text>
-        <Text style={styles.count}>{`${formatVoteCount(totalCount)}명이 투표했어요!`}</Text>
+        <View style={styles.textBlock}>
+          <Text style={styles.question}>{question}</Text>
+          <Text style={styles.count}>{`${formatVoteCount(totalCount)}명이 투표했어요!`}</Text>
+        </View>
         <View style={styles.choices}>
           <Pressable
             accessibilityRole="button"
@@ -37,13 +47,9 @@ export function VoteSection({ question, totalCount, myChoice, onVote }: Props) {
             accessibilityState={{ selected: myChoice === 'O', disabled: voted }}
             disabled={voted}
             onPress={() => onVote('O')}
-            style={[
-              styles.choice,
-              { backgroundColor: VOTE_BLUE_BG },
-              myChoice === 'O' && styles.choiceSelected,
-            ]}
+            style={voted && myChoice !== 'O' && styles.unselected}
           >
-            <Text style={[styles.choiceGlyph, { color: VOTE_BLUE }]}>○</Text>
+            <Image source={require('../../../assets/home/vote-o.svg')} style={styles.choice} />
           </Pressable>
           <Pressable
             accessibilityRole="button"
@@ -51,13 +57,9 @@ export function VoteSection({ question, totalCount, myChoice, onVote }: Props) {
             accessibilityState={{ selected: myChoice === 'X', disabled: voted }}
             disabled={voted}
             onPress={() => onVote('X')}
-            style={[
-              styles.choice,
-              { backgroundColor: VOTE_RED_BG },
-              myChoice === 'X' && styles.choiceSelected,
-            ]}
+            style={voted && myChoice !== 'X' && styles.unselected}
           >
-            <Text style={[styles.choiceGlyph, { color: VOTE_RED }]}>✕</Text>
+            <Image source={require('../../../assets/home/vote-x.svg')} style={styles.choice} />
           </Pressable>
         </View>
       </View>
@@ -67,46 +69,78 @@ export function VoteSection({ question, totalCount, myChoice, onVote }: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: spacing.xl,
-    paddingHorizontal: spacing.screenPadding,
-    gap: spacing.lg,
+    marginTop: homeLayout.voteTop,
+    marginHorizontal: spacing.screenPadding,
+    gap: homeLayout.voteRowGap,
   },
-  sectionTitle: {
-    ...typography.header,
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    height: 27,
+    gap: spacing.md,
+  },
+  titleIcon: {
+    width: 38,
+    height: 27.529,
+  },
+  iconBox: {
+    position: 'absolute',
+    left: 18,
+    top: 1,
+    width: 20,
+    height: 20,
+  },
+  // 27.529 정사각형 중앙의 20x20 영역을 회전시키고, 그 안에서 에셋(24x24)이 위 -2·왼쪽 -1 만큼 벗어나 있음 (가운데 정렬 대비 x +1)
+  iconMarkWrap: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    width: 27.529,
+    height: 27.529,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconMark: {
+    width: 24,
+    height: 24,
+    transform: [{ rotate: '-31.73deg' }, { translateX: 1 }],
+  },
+  title: {
+    fontFamily: fontFamily.semiBold,
+    fontSize: 20,
+    lineHeight: 27,
     color: colors.textPrimary,
   },
   card: {
-    gap: spacing.sm,
-    padding: spacing.xl,
-    borderRadius: radius.card,
+    gap: spacing.lg,
+    padding: spacing.cardPaddingY,
+    borderRadius: homeLayout.voteCardRadius,
     backgroundColor: colors.surface,
   },
+  textBlock: {
+    gap: 4,
+  },
   question: {
-    ...typography.questionLoose,
-    color: colors.textPrimary,
+    fontFamily: fontFamily.semiBold,
+    fontSize: 16,
+    lineHeight: 24,
+    color: colors.textLabel,
   },
   count: {
-    ...typography.action,
-    color: VOTE_GREEN,
+    fontFamily: fontFamily.medium,
+    fontSize: 14,
+    lineHeight: 24,
+    color: homeColors.voteCount,
   },
   choices: {
     flexDirection: 'row',
-    gap: spacing.md,
-    marginTop: spacing.sm,
+    gap: spacing.cardInnerGap,
   },
   choice: {
-    flex: 1,
-    height: CHOICE_HEIGHT,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: radius.card,
+    width: homeLayout.voteChoiceWidth,
+    height: homeLayout.voteChoiceHeight,
   },
-  choiceSelected: {
-    borderWidth: 2,
-    borderColor: colors.textPrimary,
-  },
-  choiceGlyph: {
-    fontSize: 28,
-    fontWeight: '700',
+  unselected: {
+    opacity: opacity.disabled,
   },
 });

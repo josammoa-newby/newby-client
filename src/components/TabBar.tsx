@@ -19,20 +19,29 @@ const TABS: { key: TabKey; label: string }[] = [
 
 const ICONS = {
   home: require('../../assets/icons/tab-home.svg'),
+  homeActive: require('../../assets/icons/tab-home-active.svg'),
   diary: require('../../assets/icons/tab-diary.svg'),
   profile: require('../../assets/icons/tab-profile.svg'),
 };
 
-// Figma: AI 아이콘(1:99)은 벡터 에셋 없이 도형으로 구성됨
-// 추정값, Figma 비활성 변형 필요: 비활성일 때도 활성과 같은 색(primary)을 그대로 사용 중
-function AiIcon() {
+// Figma: AI 아이콘(1:99)은 벡터 에셋 없이 도형으로 구성됨 (홈 화면 탭바 4:5 의 비활성 색 반영)
+// 비활성 막대 색은 theme에 없어 이 파일에서만 정의함
+const AI_INACTIVE_BAR = '#b6bfce';
+
+function AiIcon({ selected }: { selected: boolean }) {
   return (
     <View style={styles.aiIcon}>
-      <View style={[styles.aiBar, { top: 6.42 }]} />
-      <View style={[styles.aiBar, { top: 12.71 }]} />
-      <View style={styles.aiHighlight} />
-      <View style={[styles.aiDot, { left: 6.07 }]} />
-      <View style={[styles.aiDot, { left: 17.57 }]} />
+      <View
+        style={[styles.aiBar, { top: 6.42 }, !selected && { backgroundColor: AI_INACTIVE_BAR }]}
+      />
+      <View
+        style={[styles.aiBar, { top: 12.71 }, !selected && { backgroundColor: AI_INACTIVE_BAR }]}
+      />
+      <View
+        style={[styles.aiHighlight, !selected && { backgroundColor: colors.textLabel }]}
+      />
+      <View style={[styles.aiDot, { left: 6.07 }, !selected && { backgroundColor: colors.textMuted }]} />
+      <View style={[styles.aiDot, { left: 17.57 }, !selected && { backgroundColor: colors.textMuted }]} />
     </View>
   );
 }
@@ -53,9 +62,12 @@ export function TabBar({ active, onChange }: Props) {
               style={styles.item}
             >
               {key === 'ai' ? (
-                <AiIcon />
+                <AiIcon selected={selected} />
               ) : (
-                <Image source={ICONS[key]} style={styles.icon} />
+                <Image
+                  source={key === 'home' && selected ? ICONS.homeActive : ICONS[key]}
+                  style={styles.icon}
+                />
               )}
               <Text
                 style={[

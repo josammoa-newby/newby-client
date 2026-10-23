@@ -1,6 +1,8 @@
+import { Image } from 'expo-image';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { colors, radius, spacing, typography } from '@/theme';
+import { colors, fontFamily, spacing, typography } from '@/theme';
+import { homeLayout } from './constants';
 import { formatCompactCount } from './format';
 import type { PopularPost } from './mock';
 
@@ -9,10 +11,7 @@ type Props = {
   onPressPost: (id: string) => void;
 };
 
-// 썸네일 이미지 대신 쓰는 색상 팔레트 (실제 썸네일 연동 전 placeholder)
-const THUMBNAIL_COLORS = [colors.surface, colors.surfaceSelected, colors.bubble, colors.chatField];
-
-// Figma 디자인 없음 — 임시 구현. 인기글 0개면 상위 컴포넌트에서 섹션 자체를 숨김
+// Figma: 인기글 4:271. 인기글 0개면 섹션 자체를 숨김
 export function PopularPostsSection({ posts, onPressPost }: Props) {
   if (posts.length === 0) return null;
 
@@ -24,26 +23,43 @@ export function PopularPostsSection({ posts, onPressPost }: Props) {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.list}
       >
-        {posts.map((post, i) => (
+        {posts.map((post) => (
           <Pressable
             key={post.id}
             accessibilityRole="button"
             onPress={() => onPressPost(post.id)}
             style={styles.card}
           >
-            <View
-              style={[
-                styles.thumbnail,
-                { backgroundColor: THUMBNAIL_COLORS[i % THUMBNAIL_COLORS.length] },
-              ]}
-            />
-            <Text style={styles.author}>{post.authorName}</Text>
-            <Text numberOfLines={2} style={styles.title}>
-              {post.title}
-            </Text>
-            <View style={styles.stats}>
-              <Text style={styles.stat}>{`❤️ ${formatCompactCount(post.likeCount)}`}</Text>
-              <Text style={styles.stat}>{`💬 ${formatCompactCount(post.commentCount)}`}</Text>
+            {post.thumbnail ? (
+              <Image source={post.thumbnail} contentFit="cover" style={styles.thumbnail} />
+            ) : (
+              <View style={[styles.thumbnail, styles.thumbnailEmpty]} />
+            )}
+            <View style={styles.info}>
+              <Text style={styles.author}>{post.authorName}</Text>
+              <Text numberOfLines={2} style={styles.title}>
+                {post.title}
+              </Text>
+              <View style={styles.stats}>
+                <View style={styles.stat}>
+                  <Image
+                    source={require('../../../assets/home/post-like.svg')}
+                    style={styles.statIcon}
+                  />
+                  <Text style={[styles.statCount, { color: colors.textLabel }]}>
+                    {formatCompactCount(post.likeCount)}
+                  </Text>
+                </View>
+                <View style={styles.stat}>
+                  <Image
+                    source={require('../../../assets/home/post-comment.svg')}
+                    style={styles.statIcon}
+                  />
+                  <Text style={[styles.statCount, { color: colors.textPrimary }]}>
+                    {formatCompactCount(post.commentCount)}
+                  </Text>
+                </View>
+              </View>
             </View>
           </Pressable>
         ))}
@@ -52,47 +68,60 @@ export function PopularPostsSection({ posts, onPressPost }: Props) {
   );
 }
 
-// theme에 맞는 카드 크기 토큰이 없어 임시로 직접 지정함 (추후 theme 추가 검토)
-const CARD_WIDTH = 160;
-const THUMBNAIL_HEIGHT = 96;
-
 const styles = StyleSheet.create({
   container: {
-    marginTop: spacing.xl,
-    gap: spacing.lg,
+    marginTop: homeLayout.popularTop,
+    gap: homeLayout.popularTitleGap,
   },
   sectionTitle: {
     ...typography.header,
+    lineHeight: 24,
     color: colors.textPrimary,
-    marginHorizontal: spacing.screenPadding,
+    marginLeft: homeLayout.gutter,
   },
   list: {
-    gap: spacing.cardInnerGap,
-    paddingHorizontal: spacing.screenPadding,
+    gap: homeLayout.postGap,
+    paddingHorizontal: homeLayout.gutter,
   },
   card: {
-    width: CARD_WIDTH,
-    gap: spacing.xs,
+    width: homeLayout.postWidth,
+    gap: homeLayout.postGapInner,
   },
   thumbnail: {
-    width: CARD_WIDTH,
-    height: THUMBNAIL_HEIGHT,
-    borderRadius: radius.chip,
+    width: '100%',
+    height: homeLayout.postThumbHeight,
+    borderRadius: homeLayout.postThumbRadius,
+  },
+  thumbnailEmpty: {
+    backgroundColor: colors.surface,
+  },
+  info: {
+    gap: homeLayout.postGapInner,
   },
   author: {
     ...typography.caption,
     color: colors.textMuted,
   },
   title: {
-    ...typography.suggestionTitle,
+    ...typography.suggestionBody,
     color: colors.textPrimary,
   },
   stats: {
     flexDirection: 'row',
-    gap: spacing.sm,
+    alignItems: 'center',
+    gap: spacing.cardInnerGap,
   },
   stat: {
-    ...typography.caption,
-    color: colors.textMuted,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  statIcon: {
+    width: homeLayout.postIcon,
+    height: homeLayout.postIcon,
+  },
+  statCount: {
+    fontFamily: fontFamily.medium,
+    fontSize: 10,
   },
 });
