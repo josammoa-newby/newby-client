@@ -6,6 +6,13 @@ export type ApiErrorCode =
   | 'VALIDATION_ERROR'
   | 'PROFILE_NOT_FOUND'
   | 'RATE_LIMITED'
+  | 'SUPERVISOR_NOT_FOUND'
+  | 'SESSION_NOT_FOUND'
+  | 'MESSAGE_NOT_FOUND'
+  | 'FEEDBACK_ALREADY_EXISTS'
+  | 'AI_UNAVAILABLE'
+  | 'AI_RESPONSE_INVALID'
+  | 'AI_NOT_CONFIGURED'
   | 'NETWORK_ERROR'
   | 'SERVER_ERROR'
   // 서버가 새로 추가하는 코드도 문자열로 받을 수 있게 열어 둔다.
