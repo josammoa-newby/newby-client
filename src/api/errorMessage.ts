@@ -14,6 +14,8 @@ const MESSAGES: Record<string, string> = {
   AI_RESPONSE_INVALID: 'AI 응답을 이해하지 못했어요. 다시 시도해줘',
   AI_NOT_CONFIGURED: 'AI 설정이 아직 준비되지 않았어요',
   RATE_LIMITED: '요청이 너무 많아요. 잠시 후 다시 시도해줘',
+  DIARY_NOT_FOUND: '일기를 찾을 수 없어요',
+  MISSION_NOT_FOUND: '미션을 찾을 수 없어요',
 };
 const FALLBACK_MESSAGE = '잠시 후 다시 시도해주세요';
 

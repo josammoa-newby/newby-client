@@ -13,6 +13,8 @@ export type ApiErrorCode =
   | 'AI_UNAVAILABLE'
   | 'AI_RESPONSE_INVALID'
   | 'AI_NOT_CONFIGURED'
+  | 'DIARY_NOT_FOUND'
+  | 'MISSION_NOT_FOUND'
   | 'NETWORK_ERROR'
   | 'SERVER_ERROR'
   // 서버가 새로 추가하는 코드도 문자열로 받을 수 있게 열어 둔다.

@@ -2,6 +2,8 @@ import { Image } from 'expo-image';
 import { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { apiErrorMessage } from '@/api';
+import { ApiError } from '@/api/errors';
 import { colors, radius, spacing, typography } from '@/theme';
 import { CalendarGrid } from './CalendarGrid';
 import { diaryLayout, diaryText } from './constants';
@@ -19,7 +21,8 @@ export function CalendarTab() {
 
   if (loading && !data) return <DiaryLoading />;
   if (error || !data) {
-    return <DiaryError message="일기 정보를 불러오지 못했어요" onRetry={retry} />;
+    const message = error instanceof ApiError ? apiErrorMessage(error) : '일기 정보를 불러오지 못했어요';
+    return <DiaryError message={message} onRetry={retry} />;
   }
 
   return (
