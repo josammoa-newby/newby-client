@@ -26,7 +26,6 @@ export type PopularPost = {
 };
 
 export type HomeData = {
-  user: { nickname: string };
   hasUnreadNotification: boolean;
   tip: { text: string };
   vote: HomeVote;
@@ -92,7 +91,6 @@ const MOCK_DELAY_MS = 400;
 export async function getHome(): Promise<HomeData> {
   return delay(
     {
-      user: { nickname: '미림' },
       hasUnreadNotification,
       tip: { text: '다른 신입들은 어떻게 질문할까?' },
       vote: voteState,
