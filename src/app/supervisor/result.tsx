@@ -20,6 +20,8 @@ export default function SupervisorResult() {
   return (
     <View style={[styles.container, { paddingTop: insets.top + spacing.xl }]}>
       <Text style={styles.title}>상사 등록 완료</Text>
+      {/* 서버 연동 전 mock 화면임을 알리는 임시 배지 — feature/supervisor-result 브랜치에서 실제 결과 카드로 교체 */}
+      <Text style={styles.mockBadge}>Mock 화면 · 결과 카드는 다음 브랜치에서 교체 예정</Text>
       <Text style={styles.code}>{supervisor?.code ?? '-'}</Text>
       <Text style={styles.nickname}>{supervisor?.nickname ?? ''}</Text>
       <View style={styles.footer}>
@@ -39,6 +41,11 @@ const styles = StyleSheet.create({
   title: {
     ...typography.stepTitle,
     color: colors.textPrimary,
+  },
+  mockBadge: {
+    ...typography.caption,
+    color: colors.accent,
+    marginTop: spacing.sm,
   },
   code: {
     ...typography.header,

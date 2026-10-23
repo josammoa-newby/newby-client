@@ -43,6 +43,8 @@ export function QuizLayout({
     <View style={[styles.container, { paddingTop: insets.top + signupLayout.headerTop }]}>
       <View style={styles.padded}>
         <StepHeader title="상사 추가" progress={progress} onBack={onBack ?? (() => router.back())} />
+        {/* 서버 연동 전 mock 화면임을 알리는 임시 배지 — 연동 후 제거 */}
+        <Text style={styles.mockBadge}>Mock 화면 · 서버 연동 전</Text>
       </View>
       <KeyboardAvoidingView
         style={styles.flex}
@@ -76,6 +78,12 @@ const styles = StyleSheet.create({
   },
   padded: {
     paddingHorizontal: spacing.screenPadding,
+  },
+  mockBadge: {
+    ...typography.caption,
+    color: colors.accent,
+    textAlign: 'center',
+    marginTop: spacing.xs,
   },
   content: {
     paddingHorizontal: spacing.screenPadding,
