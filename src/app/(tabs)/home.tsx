@@ -4,6 +4,7 @@ import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-nat
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components';
+import { AiPromoCard } from '@/features/home/AiPromoCard';
 import { GreetingBanner } from '@/features/home/GreetingBanner';
 import { HomeHeader } from '@/features/home/HomeHeader';
 import { getHome, markNotificationsRead, submitVote, type HomeData, type VoteChoice } from '@/features/home/mock';
@@ -34,12 +35,8 @@ export default function Home() {
     load();
   }, [load]);
 
-  const handleShortcut = (key: ShortcutKey) => {
-    if (key === 'ai') {
-      router.push('/ai');
-      return;
-    }
-    // TODO: 캘린더/미션/커뮤니티 화면이 아직 없음 — 화면 생기면 연결
+  const handleShortcut = (_key: ShortcutKey) => {
+    // TODO: 꾸미기/캘린더/미션/커뮤니티 화면이 아직 없음 — 화면 생기면 연결
   };
 
   const handleVote = async (choice: VoteChoice) => {
@@ -94,6 +91,7 @@ export default function Home() {
         <GreetingBanner nickname={data.user.nickname} />
         <ShortcutGrid onPress={handleShortcut} />
         <TipBar text={data.tip.text} onPress={() => router.push('/ai')} />
+        <AiPromoCard onPress={() => router.push('/ai')} />
         <VoteSection
           question={data.vote.question}
           totalCount={data.vote.totalCount}
