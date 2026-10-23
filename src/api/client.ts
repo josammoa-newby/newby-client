@@ -24,6 +24,8 @@ export type RequestOptions = {
   body?: unknown;
   // true 이면 Authorization: Bearer <accessToken> 을 붙인다.
   auth?: boolean;
+  // 호출별 타임아웃(ms). 없으면 기본 15초. (AI 응답처럼 느린 호출에 쓴다)
+  timeoutMs?: number;
 };
 
 type ApiEnvelope<T> = {
@@ -44,9 +46,10 @@ async function send<T>(
   method: HttpMethod,
   body: unknown,
   accessToken: string | null,
+  timeoutMs: number = REQUEST_TIMEOUT_MS,
 ): Promise<T> {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
     const headers: Record<string, string> = { Accept: 'application/json' };
@@ -105,7 +108,7 @@ function refreshOnce(): Promise<string | null> {
 }
 
 export async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const { method = 'GET', body, auth = false } = options;
+  const { method = 'GET', body, auth = false, timeoutMs } = options;
 
   let accessToken: string | null = null;
   if (auth) {
@@ -114,12 +117,12 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
   }
 
   try {
-    return await send<T>(path, method, body, accessToken);
+    return await send<T>(path, method, body, accessToken, timeoutMs);
   } catch (err) {
     if (!auth || !(err instanceof ApiError) || err.code !== 'UNAUTHORIZED') throw err;
 
     const newAccessToken = await refreshOnce();
-    if (newAccessToken) return send<T>(path, method, body, newAccessToken);
+    if (newAccessToken) return send<T>(path, method, body, newAccessToken, timeoutMs);
 
     await tokenStorage.clearTokens();
     onUnauthorized?.();
