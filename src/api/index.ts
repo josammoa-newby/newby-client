@@ -3,6 +3,7 @@ export * from './auth';
 export * from './diaries';
 export * from './errorMessage';
 export * from './feedback';
+export * from './logout';
 export * from './me';
 export * from './missions';
 export * from './persona';
