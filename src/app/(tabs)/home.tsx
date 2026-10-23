@@ -4,6 +4,7 @@ import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-nat
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components';
+import { AiPromoCard } from '@/features/home/AiPromoCard';
 import { GreetingBanner } from '@/features/home/GreetingBanner';
 import { HomeHeader } from '@/features/home/HomeHeader';
 import { getHome, markNotificationsRead, type HomeData } from '@/features/home/mock';
@@ -35,15 +36,18 @@ export default function Home() {
   }, [load]);
 
   const handleShortcut = (key: ShortcutKey) => {
-    if (key === 'ai') {
-      router.push('/ai');
+    // diary는 탭 화면(싱글 인스턴스)이라 push 대신 navigate를 써야 이미 마운트된 화면의
+    // params가 제대로 갱신됨 (push는 스택에 새로 쌓으려는 의도라 탭 전환에는 안 맞음)
+    if (key === 'calendar') {
+      router.navigate({ pathname: '/diary', params: { tab: 'calendar' } });
       return;
     }
-    // TODO: 캘린더/미션/커뮤니티 화면이 아직 없음 — 화면 생기면 연결
+    if (key === 'mission') {
+      router.navigate({ pathname: '/diary', params: { tab: 'mission' } });
+      return;
+    }
+    // TODO: 꾸미기/커뮤니티 화면이 아직 없음 — 화면 생기면 연결
   };
-
-  // 투표는 오늘의 투표 화면(/vote)에서 한다
-  const handleVote = () => router.push('/vote');
 
   const handleNotificationPress = () => {
     // 알림 화면이 아직 없어 점만 끔. 낙관적 업데이트 (실패해도 다음 로드 때 서버 값으로 맞춰짐)
@@ -84,11 +88,11 @@ export default function Home() {
         <GreetingBanner nickname={data.user.nickname} />
         <ShortcutGrid onPress={handleShortcut} />
         <TipBar text={data.tip.text} onPress={() => router.push('/ai')} />
+        <AiPromoCard onPress={() => router.push('/ai')} />
         <VoteSection
           question={data.vote.question}
           totalCount={data.vote.totalCount}
-          myChoice={data.vote.myChoice}
-          onVote={handleVote}
+          onPress={() => router.push('/vote')}
         />
         <PopularPostsSection posts={data.popularPosts} onPressPost={handlePressPost} />
       </ScrollView>
