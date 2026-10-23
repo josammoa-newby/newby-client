@@ -3,13 +3,13 @@ import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Button } from '@/components';
-import { colors, fontFamily, opacity, spacing, typography } from '@/theme';
+import { colors, fontFamily, spacing, typography } from '@/theme';
 import { ChoiceCard } from './ChoiceCard';
 import { voteLayout } from './constants';
 import type { VoteChoice } from './types';
 import { useTodayVote } from './useTodayVote';
 import { formatMonthDay } from './utils';
+import { VoteButton } from './VoteButton';
 import { VoteHeader } from './VoteHeader';
 import { VoteError, VoteLoading } from './VoteStatus';
 import { VoteTitle } from './VoteTitle';
@@ -88,13 +88,13 @@ export function VoteScreen() {
         {submitError && (
           <Text style={styles.errorText}>투표를 저장하지 못했어요. 다시 시도해 주세요</Text>
         )}
-        {/* 선택 전에는 비활성 (Figma에 비활성 디자인 없음, 공통 disabled 투명도 사용) */}
-        <View
-          pointerEvents={current ? 'auto' : 'none'}
-          style={!current && styles.disabled}
-        >
-          <Button title="다음" onPress={handleNext} loading={submitting} />
-        </View>
+        {/* 선택 전에는 회색 비활성, 선택하면 주황색 활성. 이미 투표했으면 결과로만 이동 */}
+        <VoteButton
+          title={locked ? '결과 보기' : '투표하기'}
+          enabled={current !== null}
+          loading={submitting}
+          onPress={handleNext}
+        />
       </View>
     </View>
   );
@@ -130,9 +130,6 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     paddingTop: voteLayout.footerTop,
     paddingHorizontal: spacing.screenPadding,
-  },
-  disabled: {
-    opacity: opacity.disabled,
   },
   errorText: {
     ...typography.caption,

@@ -51,6 +51,13 @@ export const voteLayout = {
   reactionOverlap: 13, // 리액션 이모지 간 가로 간격 (24 크기, 겹침 11)
   reactionSheetScale: 5.6396, // 스프라이트 시트를 이모지 크기의 몇 배로 그렸는지
   previewLength: 17, // 댓글 미리보기 글자 수
+  // 결과 막대가 차오르는 애니메이션
+  riseDuration: 1600,
+  waveWidth: 32, // 물결 하나의 가로 길이(한 주기)
+  waveHeight: 12, // 물결 높이
+  waveCount: 12, // 막대 너비 + 한 주기를 덮는 개수
+  waveSpeed: 900, // 앞쪽 물결이 한 주기 움직이는 시간(ms)
+  waveSpeedBack: 1400, // 뒤쪽 물결(반대 방향)
 } as const;
 
 // 리액션 스프라이트(assets/vote/reactions.png)에서 각 이모지가 있는 위치 (Figma 17:1524~1526 의 left/top, 이모지 크기 대비 %)
