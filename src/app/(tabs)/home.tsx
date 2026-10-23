@@ -36,12 +36,14 @@ export default function Home() {
   }, [load]);
 
   const handleShortcut = (key: ShortcutKey) => {
+    // diary는 탭 화면(싱글 인스턴스)이라 push 대신 navigate를 써야 이미 마운트된 화면의
+    // params가 제대로 갱신됨 (push는 스택에 새로 쌓으려는 의도라 탭 전환에는 안 맞음)
     if (key === 'calendar') {
-      router.push({ pathname: '/diary', params: { tab: 'calendar' } });
+      router.navigate({ pathname: '/diary', params: { tab: 'calendar' } });
       return;
     }
     if (key === 'mission') {
-      router.push({ pathname: '/diary', params: { tab: 'mission' } });
+      router.navigate({ pathname: '/diary', params: { tab: 'mission' } });
       return;
     }
     // TODO: 꾸미기/커뮤니티 화면이 아직 없음 — 화면 생기면 연결
