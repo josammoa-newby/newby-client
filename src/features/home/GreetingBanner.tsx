@@ -5,15 +5,16 @@ import { homeLayout } from './constants';
 import { MiniCalendar } from './MiniCalendar';
 
 type Props = {
-  nickname: string;
+  // 이름을 못 가져왔으면 null — 이름 없이 인사말만 보여줌
+  name: string | null;
 };
 
 // Figma: banner 12:1222 (393x174, #ff9f1c 단색, 화면 가장자리까지 꽉 채움 — 라운드/그라데이션 없음)
-export function GreetingBanner({ nickname }: Props) {
+export function GreetingBanner({ name }: Props) {
   return (
     <View style={styles.container}>
       <View>
-        <Text style={styles.greeting}>{`${nickname}님, `}</Text>
+        {name ? <Text style={styles.greeting}>{`${name}님, `}</Text> : null}
         <Text style={[styles.greeting, styles.greetingBold]}>좋은 하루에요</Text>
       </View>
       <MiniCalendar date={new Date()} />

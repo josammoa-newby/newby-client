@@ -7,6 +7,7 @@ import { Button } from '@/components';
 import { AiPromoCard } from '@/features/home/AiPromoCard';
 import { GreetingBanner } from '@/features/home/GreetingBanner';
 import { HomeHeader } from '@/features/home/HomeHeader';
+import { getGreetingName } from '@/features/home/profile';
 import { getHome, markNotificationsRead, type HomeData } from '@/features/home/mock';
 import { PopularPostsSection } from '@/features/home/PopularPostsSection';
 import { ShortcutGrid, type ShortcutKey } from '@/features/home/ShortcutGrid';
@@ -19,12 +20,14 @@ export default function Home() {
   const insets = useSafeAreaInsets();
   const [status, setStatus] = useState<'loading' | 'error' | 'ready'>('loading');
   const [data, setData] = useState<HomeData | null>(null);
+  const [name, setName] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setStatus('loading');
     try {
-      const home = await getHome();
+      const [home, greetingName] = await Promise.all([getHome(), getGreetingName()]);
       setData(home);
+      setName(greetingName);
       setStatus('ready');
     } catch {
       setStatus('error');
@@ -89,7 +92,7 @@ export default function Home() {
         onNotificationPress={handleNotificationPress}
       />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
-        <GreetingBanner nickname={data.user.nickname} />
+        <GreetingBanner name={name} />
         <ShortcutGrid onPress={handleShortcut} />
         <TipBar text={data.tip.text} onPress={() => router.push('/ai')} />
         <AiPromoCard onPress={() => router.push('/ai')} />
