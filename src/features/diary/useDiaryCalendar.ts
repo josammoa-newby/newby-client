@@ -1,33 +1,24 @@
-import { useCallback, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
+import { useCallback, useRef } from 'react';
 
-import { createDiaryEntry, getDiaryCalendar } from './service';
+import { getDiaryCalendar } from './service';
 import { useAsyncData } from './useAsyncData';
 
 export function useDiaryCalendar() {
   const loader = useCallback(() => getDiaryCalendar(), []);
-  const { data, loading, error, retry, setData } = useAsyncData(loader);
-  const [saving, setSaving] = useState(false);
-  const [saveError, setSaveError] = useState(false);
+  const { data, loading, error, retry } = useAsyncData(loader);
 
-  // 일기 작성 화면이 아직 없어 서버가 알려준 "오늘"의 기록을 바로 남긴다
-  const addTodayEntry = useCallback(async () => {
-    if (!data || saving) return;
-    if (data.entries.some((entry) => entry.date === data.today)) return;
-    setSaving(true);
-    setSaveError(false);
-    try {
-      const entry = await createDiaryEntry({ date: data.today });
-      setData((prev) =>
-        prev
-          ? { ...prev, entries: [...prev.entries, entry], recordCount: prev.recordCount + 1 }
-          : prev,
-      );
-    } catch {
-      setSaveError(true);
-    } finally {
-      setSaving(false);
-    }
-  }, [data, saving, setData]);
+  // 일기 작성 화면에서 돌아오면 새 일기가 반영되도록 다시 불러온다. 첫 진입은 useAsyncData 가 이미 불러온다
+  const firstFocus = useRef(true);
+  useFocusEffect(
+    useCallback(() => {
+      if (firstFocus.current) {
+        firstFocus.current = false;
+        return;
+      }
+      retry();
+    }, [retry]),
+  );
 
-  return { data, loading, error, retry, saving, saveError, addTodayEntry };
+  return { data, loading, error, retry };
 }

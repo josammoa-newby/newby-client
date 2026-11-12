@@ -15,6 +15,8 @@ const MESSAGES: Record<string, string> = {
   AI_NOT_CONFIGURED: 'AI 설정이 아직 준비되지 않았어요',
   RATE_LIMITED: '요청이 너무 많아요. 잠시 후 다시 시도해줘',
   DIARY_NOT_FOUND: '일기를 찾을 수 없어요',
+  DIARY_TOO_SHORT: '20자 이상 쓰면 AI 분석을 받을 수 있어요',
+  DIARY_CHANGED: '분석하는 동안 일기가 수정됐어요. 다시 시도해줘',
   MISSION_NOT_FOUND: '미션을 찾을 수 없어요',
 };
 const FALLBACK_MESSAGE = '잠시 후 다시 시도해주세요';

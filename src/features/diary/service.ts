@@ -1,13 +1,11 @@
 // 일기 화면이 호출하는 유일한 진입점.
-// 미션·달력은 실서버, 헤더·일기 작성은 아직 mock.
+// 미션·달력은 실서버, 헤더는 아직 mock. (일기 작성·분석은 write/ 에서 src/api 를 직접 호출)
 import { fetchDiaryCalendar } from './calendarAdapter';
 import { generateMissions, getMissionDay, getMyStats, setMissionDone } from '@/api';
 import type { MissionDay, Stats } from '@/api';
-import { mockCreateDiaryEntry, mockGetDiaryHeader } from './mock';
+import { mockGetDiaryHeader } from './mock';
 import type {
-  CreateDiaryEntryInput,
   DiaryCalendarResponse,
-  DiaryEntry,
   DiaryHeaderResponse,
   Mission,
 } from './types';
@@ -23,10 +21,6 @@ export function getDiaryCalendar(params?: {
 }): Promise<DiaryCalendarResponse> {
   // 서버 GET /api/diaries 로 월 범위를 조회해 화면 모양으로 변환한다. (변환은 calendarAdapter.ts)
   return fetchDiaryCalendar(params);
-}
-
-export function createDiaryEntry(input: CreateDiaryEntryInput): Promise<DiaryEntry> {
-  return mockCreateDiaryEntry(input);
 }
 
 // 진행 중인 generate 가 있으면 같은 Promise 를 공유한다. (탭을 빠르게 오가도 한 번만 호출)

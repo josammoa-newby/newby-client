@@ -1,10 +1,11 @@
 import { Image } from 'expo-image';
+import { router } from 'expo-router';
 import { useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { apiErrorMessage } from '@/api';
 import { ApiError } from '@/api/errors';
-import { colors, radius, spacing, typography } from '@/theme';
+import { colors, radius, spacing } from '@/theme';
 import { CalendarGrid } from './CalendarGrid';
 import { diaryColors, diaryLayout, diaryText } from './constants';
 import { DiaryError, DiaryLoading } from './DiaryStatus';
@@ -13,7 +14,7 @@ import { formatMonthTitle, formatRecordMessage } from './utils';
 
 // Figma: 일기 > 캘린더 (7:418)
 export function CalendarTab() {
-  const { data, loading, error, retry, saving, saveError, addTodayEntry } = useDiaryCalendar();
+  const { data, loading, error, retry } = useDiaryCalendar();
   const recordedDates = useMemo(
     () => new Set(data?.entries.map((entry) => entry.date) ?? []),
     [data],
@@ -42,15 +43,15 @@ export function CalendarTab() {
 
         <Text style={styles.month}>{formatMonthTitle(data.year, data.month)}</Text>
         <CalendarGrid year={data.year} month={data.month} recordedDates={recordedDates} />
-        {saveError && <Text style={styles.saveError}>일기를 저장하지 못했어요. 다시 시도해 주세요</Text>}
       </ScrollView>
 
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="일기 쓰기"
-        accessibilityState={{ busy: saving }}
-        disabled={saving}
-        onPress={addTodayEntry}
+        // 이미 쓴 날은 동작하지 않는다 (날짜 상세 보기가 생기면 정리)
+        onPress={() => {
+          if (!recordedDates.has(data.today)) router.push('/diary-write');
+        }}
         style={styles.fab}
       >
         <Image source={require('../../../assets/diary/plus.svg')} style={styles.fabIcon} />
@@ -103,11 +104,6 @@ const styles = StyleSheet.create({
     marginBottom: diaryLayout.monthToWeekdays,
     marginLeft: diaryLayout.monthLeft,
     color: colors.textPrimary,
-  },
-  saveError: {
-    ...typography.caption,
-    textAlign: 'center',
-    color: colors.textMuted,
   },
   fab: {
     position: 'absolute',
