@@ -3,6 +3,30 @@ import type { AwardResult } from './stats';
 
 export type DiarySource = 'manual' | 'ai_message';
 
+// AI 일기 분석 결과 (POST /api/diaries/:id/analyze, 일기 조회에도 포함)
+export type DiaryAnalysis = {
+  // 일기 요약 1~2문장
+  summary: string;
+  // 핵심 감정 한 단어
+  emotion: string;
+  // 잘한 점 1~3개 (safetyFlag 가 true 면 0~3개)
+  strengths: string[];
+  // 성장 방향 1~3개 (safetyFlag 가 true 면 0~3개)
+  growthPoints: string[];
+  // 내일 해볼 작은 행동. safetyFlag 가 true 면 서버가 상담 안내 문구를 붙여서 준다
+  nextStep: string;
+  safetyFlag: boolean;
+  model: string;
+  generatedAt: string;
+};
+
+export type AnalyzeDiaryResult = {
+  id: string;
+  analysis: DiaryAnalysis;
+  // 저장된 분석을 그대로 돌려줬는지 (true 면 AI 를 부르지 않음)
+  reused: boolean;
+};
+
 // 서버 diaryService 의 응답. date 는 'YYYY-MM-DD', createdAt/updatedAt 은 DB 타임스탬프 문자열
 export type Diary = {
   id: string;
@@ -13,6 +37,8 @@ export type Diary = {
   messageId: string | null;
   createdAt: string;
   updatedAt: string;
+  // 아직 분석하지 않았거나 content/mood 가 수정돼 비워졌으면 null
+  analysis: DiaryAnalysis | null;
 };
 
 // 작성 응답: 그날 첫 일기면 경험치 지급 결과(reward), 아니면 null
@@ -47,6 +73,9 @@ export type ListDiariesParams = {
   limit?: number;
 };
 
+// AI 때문에 최대 약 30초 걸릴 수 있다
+const ANALYZE_TIMEOUT_MS = 35000;
+
 const diaryPath = (id: string) => `/api/diaries/${encodeURIComponent(id)}`;
 
 export function createDiary(input: CreateDiaryInput): Promise<DiaryCreated> {
@@ -72,4 +101,15 @@ export function updateDiary(id: string, patch: UpdateDiaryInput): Promise<Diary>
 // 삭제하면 그날 일기가 하나도 안 남을 때 첫 일기 경험치가 되돌려진다.
 export function deleteDiary(id: string): Promise<{ id: string }> {
   return request<{ id: string }>(diaryPath(id), { method: 'DELETE', auth: true });
+}
+
+// 일기 AI 분석. 20자 미만이면 400 DIARY_TOO_SHORT, 분석 중 일기가 수정되면 409 DIARY_CHANGED.
+// 저장된 분석이 있으면 그대로 돌려주고(reused), force 를 주면 다시 분석한다.
+export function analyzeDiary(id: string, options: { force?: boolean } = {}): Promise<AnalyzeDiaryResult> {
+  return request<AnalyzeDiaryResult>(`${diaryPath(id)}/analyze`, {
+    method: 'POST',
+    body: options.force === undefined ? undefined : { force: options.force },
+    auth: true,
+    timeoutMs: ANALYZE_TIMEOUT_MS,
+  });
 }

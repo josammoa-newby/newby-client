@@ -23,10 +23,6 @@ export type DiaryCalendarResponse = {
   entries: DiaryEntry[]; // 해당 월에 기록이 있는 날
 };
 
-export type CreateDiaryEntryInput = {
-  date: string; // 'YYYY-MM-DD'
-};
-
 // 서버 미션 그대로. reason 은 아직 화면에 보여주지 않지만 모델에는 둔다
 export type Mission = ServerMission;
 
