@@ -41,6 +41,7 @@ export const diaryLayout = {
   levelRowGap: 12,
   levelBarHeight: 26,
   levelLabelLeft: 12,
+  levelFillMinWidth: 64, // 0% 여도 채움 막대 안의 Lv.N 라벨이 잘리지 않는 최소 너비
   missionTitleTop: 41, // 레벨 바 ~ 오늘의 미션
   missionTitleToList: 17,
   chipPaddingY: 4,
@@ -69,3 +70,9 @@ export const diaryText = {
 } as const;
 
 export const WEEKDAY_LABELS = ['일', '월', '화', '수', '목', '금', '토'] as const;
+
+// 서버에는 배너 문구가 없어 클라이언트 상수로 둔다
+export const missionBanner = {
+  title: '오늘의 습관을 만들어보세요.',
+  subtitle: '하나씩 클리어해봐요.',
+} as const;

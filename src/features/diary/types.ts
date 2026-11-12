@@ -1,3 +1,5 @@
+import type { ServerMission, Stats } from '@/api';
+
 // 서버 응답과 같다고 가정한 타입. 날짜/시간은 ISO 문자열 (date 는 'YYYY-MM-DD', 나머지는 ISO 8601)
 
 export type DiaryHeaderResponse = {
@@ -25,34 +27,10 @@ export type CreateDiaryEntryInput = {
   date: string; // 'YYYY-MM-DD'
 };
 
-export type MissionLevel = {
-  level: number;
-  name: string;
-  currentXp: number;
-  nextLevelXp: number;
-};
-
-export type Mission = {
-  id: string;
-  title: string;
-  xp: number;
-  completed: boolean;
-  completedAt: string | null;
-  createdAt: string;
-};
+// 서버 미션 그대로. reason 은 아직 화면에 보여주지 않지만 모델에는 둔다
+export type Mission = ServerMission;
 
 export type MissionsResponse = {
-  banner: { title: string; subtitle: string };
-  level: MissionLevel;
   missions: Mission[];
-};
-
-export type ToggleMissionInput = {
-  id: string;
-  completed: boolean;
-};
-
-export type ToggleMissionResponse = {
-  mission: Mission;
-  level: MissionLevel;
+  stats: Stats;
 };

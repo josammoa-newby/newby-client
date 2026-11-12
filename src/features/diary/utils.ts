@@ -1,4 +1,5 @@
-import type { Mission, MissionLevel } from './types';
+import type { Stats } from '@/api';
+import type { Mission } from './types';
 
 // '26년 9월'
 export function formatMonthTitle(year: number, month: number): string {
@@ -14,25 +15,26 @@ export function formatXp(xp: number): string {
   return `+${xp} XP`;
 }
 
-// 'Lv.4 적응 단계'
-export function formatLevelTitle(level: MissionLevel): string {
-  return `Lv.${level.level} ${level.name}`;
+// 'Lv.4 사원'
+export function formatLevelTitle(stats: Stats): string {
+  return `Lv.${stats.level} ${stats.title}`;
 }
 
-// 'Lv. 5까지 180 XP'
-export function formatRemainingXp(level: MissionLevel): string {
-  return `Lv. ${level.level + 1}까지 ${Math.max(0, level.nextLevelXp - level.currentXp)} XP`;
+// 'Lv.5까지 180 XP'. 최고 레벨이면 '최고 레벨'
+export function formatRemainingXp(stats: Stats): string {
+  if (stats.nextLevelXp === null) return '최고 레벨';
+  return `Lv.${stats.level + 1}까지 ${Math.max(0, stats.nextLevelXp - stats.xp)} XP`;
 }
 
-// 0~1
-export function getLevelProgress(level: MissionLevel): number {
-  if (level.nextLevelXp <= 0) return 0;
-  return Math.min(1, Math.max(0, level.currentXp / level.nextLevelXp));
+// 0~1. 서버 progress(0~100) 사용, 최고 레벨이면 가득
+export function getLevelProgress(stats: Stats): number {
+  if (stats.nextLevelXp === null) return 1;
+  return Math.min(1, Math.max(0, stats.progress / 100));
 }
 
 // '2/4'
 export function formatMissionProgress(missions: Mission[]): string {
-  return `${missions.filter((mission) => mission.completed).length}/${missions.length}`;
+  return `${missions.filter((mission) => mission.done).length}/${missions.length}`;
 }
 
 export function toDateKey(year: number, month: number, day: number): string {

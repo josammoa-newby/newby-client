@@ -13,7 +13,7 @@ type Props = {
 
 // Figma: 일기 > 미션 7:697 (미완료) / 7:707 (완료: 주황 체크 + 연한 주황 배경)
 export function MissionItem({ mission, onPress }: Props) {
-  const done = mission.completed;
+  const done = mission.done;
 
   return (
     <Pressable
