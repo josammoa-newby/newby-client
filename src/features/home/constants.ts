@@ -7,8 +7,8 @@ export const homeLayout = {
   bannerHeight: 174, // Figma 12:1222: 159 -> 174로 변경, 좌우 꽉 채우는 형태로 변경(마진/라운드 없음)
   bannerPaddingTop: 26,
   bannerPaddingHorizontal: 20,
-  bannerGreetingToCalendar: 6,
-  shortcutTop: 24, // 배너 ~ "바로가기" 제목
+  bannerCalendarTop: 94, // 배너 상단 ~ 요일 칸 (Figma 19:1816)
+  shortcutTop: 29, // 배너 ~ "바로가기" 제목 (Figma 19:1813: 배너 하단 287 ~ 제목 316)
   shortcutTitleToTiles: 19,
   tile: 73,
   tileRadius: 18,

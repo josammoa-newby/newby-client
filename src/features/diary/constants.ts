@@ -3,6 +3,7 @@ import { fontFamily } from '@/theme';
 // 일기 화면(Figma 7:418, 7:548, 7:678)에서만 쓰는 값. theme에 같은 값이 없어 이 폴더 안에서만 정의함 (공유 theme은 수정하지 않음)
 export const diaryColors = {
   chipBackground: '#fff0d6', // Sub_Color3: 완료한 미션 카드·진행 칩 배경
+  fabShadow: 'rgba(0, 0, 0, 0.08)', // 캘린더 + 버튼 그림자 (Figma 19:1737)
 } as const;
 
 export const diaryLayout = {

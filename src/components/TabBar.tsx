@@ -21,8 +21,17 @@ const ICONS = {
   home: require('../../assets/icons/tab-home.svg'),
   homeActive: require('../../assets/icons/tab-home-active.svg'),
   diary: require('../../assets/icons/tab-diary.svg'),
+  // Figma 일기 탭 활성 아이콘 (Tab_bar diary 1:135): 주황 채움 노트
+  diaryActive: require('../../assets/icons/tab-diary-active.svg'),
   profile: require('../../assets/icons/tab-profile.svg'),
 };
+
+// 활성 아이콘이 따로 있는 탭은 홈·일기뿐이다 (AI 는 AiIcon 이 직접 그림, 프로필은 Figma에 활성 상태 없음)
+function tabIcon(key: Exclude<TabKey, 'ai'>, selected: boolean) {
+  if (selected && key === 'home') return ICONS.homeActive;
+  if (selected && key === 'diary') return ICONS.diaryActive;
+  return ICONS[key];
+}
 
 // Figma: AI 아이콘(1:99)은 벡터 에셋 없이 도형으로 구성됨 (홈 화면 탭바 4:5 의 비활성 색 반영)
 // 비활성 막대 색은 theme에 없어 이 파일에서만 정의함
@@ -64,10 +73,7 @@ export function TabBar({ active, onChange }: Props) {
               {key === 'ai' ? (
                 <AiIcon selected={selected} />
               ) : (
-                <Image
-                  source={key === 'home' && selected ? ICONS.homeActive : ICONS[key]}
-                  style={styles.icon}
-                />
+                <Image source={tabIcon(key, selected)} style={styles.icon} />
               )}
               <Text
                 style={[

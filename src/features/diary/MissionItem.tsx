@@ -26,7 +26,13 @@ export function MissionItem({ mission, onPress }: Props) {
         {done && <Image source={require('../../../assets/diary/check.svg')} style={styles.check} />}
       </View>
       <Text style={[styles.title, done && styles.titleDone]}>{mission.title}</Text>
-      <Text style={[styles.xp, { color: done ? colors.primaryDark : colors.primary }]}>
+      <Text
+        style={[
+          styles.xp,
+          done && styles.xpDone,
+          { color: done ? colors.primaryDark : colors.primary },
+        ]}
+      >
         {formatXp(mission.xp)}
       </Text>
     </Pressable>
@@ -80,5 +86,9 @@ const styles = StyleSheet.create({
   },
   xp: {
     ...diaryText.missionXp,
+  },
+  // Figma 19:1790: 완료한 미션의 경험치는 취소선 (선 색은 글자색 #ea972d 와 같음)
+  xpDone: {
+    textDecorationLine: 'line-through',
   },
 });
