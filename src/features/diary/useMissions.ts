@@ -1,52 +1,93 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { getMissions, toggleMission } from './service';
-import { useAsyncData } from './useAsyncData';
+import { apiErrorMessage } from '@/api';
+import type { Stats } from '@/api';
+import { generateTodayMissions, getTodayMissions, toggleMission } from './service';
+import type { Mission } from './types';
+
+type MissionData = { missions: Mission[]; stats: Stats };
 
 export function useMissions() {
-  const { data, loading, error, retry, setData } = useAsyncData(getMissions);
-  const [saveError, setSaveError] = useState(false);
+  const [data, setData] = useState<MissionData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const mounted = useRef(true);
+  const pending = useRef(new Set<string>());
+  const dataRef = useRef<MissionData | null>(null);
+  dataRef.current = data;
 
-  // 낙관적 업데이트: 먼저 체크 상태를 바꾸고, 실패하면 되돌린다. 경험치는 서버 응답으로 맞춘다
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const { day, stats } = await getTodayMissions();
+      let missions = day.missions;
+      if (!day.generated) {
+        if (mounted.current) setGenerating(true);
+        missions = (await generateTodayMissions()).missions;
+      }
+      if (mounted.current) setData({ missions, stats });
+    } catch (e) {
+      if (mounted.current) setError(apiErrorMessage(e));
+    } finally {
+      if (mounted.current) {
+        setGenerating(false);
+        setLoading(false);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const patchMission = useCallback((id: string, patch: Partial<Mission>) => {
+    setData((prev) =>
+      prev
+        ? {
+            ...prev,
+            missions: prev.missions.map((m) => (m.id === id ? { ...m, ...patch } : m)),
+          }
+        : prev,
+    );
+  }, []);
+
+  // 낙관적 업데이트: 먼저 체크 상태를 바꾸고 실패하면 되돌린다. 같은 미션은 요청이 끝나기 전에 다시 누를 수 없다
   const toggle = useCallback(
     async (id: string) => {
-      const target = data?.missions.find((mission) => mission.id === id);
-      if (!target) return;
-      const completed = !target.completed;
-      const setCompleted = (value: boolean) =>
-        setData((prev) =>
-          prev
-            ? {
-                ...prev,
-                missions: prev.missions.map((mission) =>
-                  mission.id === id ? { ...mission, completed: value } : mission,
-                ),
-              }
-            : prev,
-        );
+      const target = dataRef.current?.missions.find((m) => m.id === id);
+      if (!target || pending.current.has(id)) return;
+      pending.current.add(id);
 
-      setSaveError(false);
-      setCompleted(completed);
+      const done = !target.done;
+      setSaveError(null);
+      patchMission(id, { done });
       try {
-        const result = await toggleMission({ id, completed });
-        setData((prev) =>
-          prev
-            ? {
-                ...prev,
-                level: result.level,
-                missions: prev.missions.map((mission) =>
-                  mission.id === id ? result.mission : mission,
-                ),
-              }
-            : prev,
-        );
-      } catch {
-        setCompleted(target.completed);
-        setSaveError(true);
+        const result = await toggleMission(id, done);
+        if (!mounted.current) return;
+        patchMission(id, result.mission);
+        const { stats } = result;
+        if (stats) setData((prev) => (prev ? { ...prev, stats } : prev));
+      } catch (e) {
+        if (mounted.current) {
+          patchMission(id, { done: target.done });
+          setSaveError(apiErrorMessage(e));
+        }
+      } finally {
+        pending.current.delete(id);
       }
     },
-    [data, setData],
+    [patchMission],
   );
 
-  return { data, loading, error, retry, saveError, toggle };
+  return { data, loading, generating, error, retry: load, saveError, toggle };
 }

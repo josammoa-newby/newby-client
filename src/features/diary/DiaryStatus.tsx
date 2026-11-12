@@ -4,10 +4,11 @@ import { Button } from '@/components';
 import { colors, spacing, typography } from '@/theme';
 
 // 로딩 / 에러(재시도) 공용 화면. 빈 데이터 상태는 각 탭에서 직접 그린다
-export function DiaryLoading() {
+export function DiaryLoading({ message }: { message?: string }) {
   return (
     <View style={styles.centered}>
       <ActivityIndicator color={colors.primary} />
+      {message && <Text style={styles.message}>{message}</Text>}
     </View>
   );
 }

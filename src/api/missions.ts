@@ -2,12 +2,21 @@ import { request } from './client';
 import type { AwardResult } from './stats';
 
 // 서버 missionService 의 응답. date 는 'YYYY-MM-DD'
+export type MissionSource = 'ai' | 'default' | 'manual';
+export type MissionDifficulty = 'easy' | 'medium' | 'hard';
+
 export type ServerMission = {
   id: string;
   date: string;
   title: string;
   done: boolean;
   xp: number;
+  // ai: 일기 분석으로 생성 / default: 기본 미션 / manual: 직접 만듦
+  source: MissionSource;
+  // 왜 이 미션인지 (60자 이내). ai 미션만 값이 있다
+  reason: string | null;
+  // 직접 만든 미션은 null
+  difficulty: MissionDifficulty | null;
   createdAt: string;
 };
 
@@ -16,7 +25,12 @@ export type MissionDay = {
   missions: ServerMission[];
   doneCount: number;
   total: number;
+  // 그 날의 자동 생성 미션(ai/default)이 이미 있는지. false 면 generateMissions 를 한 번 호출한다.
+  generated: boolean;
 };
+
+// AI 때문에 최대 약 30초 걸릴 수 있다
+const GENERATE_TIMEOUT_MS = 35000;
 
 export type CreateMissionInput = {
   // 1~100자
@@ -37,10 +51,18 @@ export type MissionDoneResult = {
 
 const missionPath = (id: string) => `/api/missions/${encodeURIComponent(id)}`;
 
-// 날짜별 미션. date 가 없으면 KST 오늘이고, 오늘 미션이 없으면 서버가 기본 미션을 만들어 준다.
-export function getMissionDay(date?: string): Promise<MissionDay> {
-  const query = date ? `?date=${encodeURIComponent(date)}` : '';
-  return request<MissionDay>(`/api/missions${query}`, { auth: true });
+// KST 오늘의 미션. 조회만 하며 만들지 않는다. generated 가 false 면 generateMissions 를 부른다.
+export function getMissionDay(): Promise<MissionDay> {
+  return request<MissionDay>('/api/missions', { auth: true });
+}
+
+// 오늘 자동 미션 생성. 멱등(이미 있으면 200, 새로 만들면 201). AI 실패 시에도 기본 미션으로 채워 성공한다.
+export function generateMissions(): Promise<MissionDay> {
+  return request<MissionDay>('/api/missions/generate', {
+    method: 'POST',
+    auth: true,
+    timeoutMs: GENERATE_TIMEOUT_MS,
+  });
 }
 
 export function createMission(input: CreateMissionInput): Promise<ServerMission> {

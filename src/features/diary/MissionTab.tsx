@@ -1,8 +1,9 @@
 import { Image } from 'expo-image';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { apiErrorMessage } from '@/api';
 import { colors, radius, spacing, typography } from '@/theme';
-import { diaryColors, diaryLayout, diaryText } from './constants';
+import { diaryColors, diaryLayout, diaryText, missionBanner } from './constants';
 import { DiaryError, DiaryLoading } from './DiaryStatus';
 import { MissionItem } from './MissionItem';
 import { useMissions } from './useMissions';
@@ -15,22 +16,23 @@ import {
 
 // Figma: 일기 > 미션 (7:678)
 export function MissionTab() {
-  const { data, loading, error, retry, saveError, toggle } = useMissions();
+  const { data, loading, generating, error, retry, saveError, toggle } = useMissions();
 
+  if (generating) return <DiaryLoading message="오늘의 미션을 만들고 있어요" />;
   if (loading && !data) return <DiaryLoading />;
   if (error || !data) {
-    return <DiaryError message="미션을 불러오지 못했어요" onRetry={retry} />;
+    return <DiaryError message={error ?? apiErrorMessage(null)} onRetry={retry} />;
   }
 
-  const progress = getLevelProgress(data.level);
+  const progress = getLevelProgress(data.stats);
 
   return (
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
       <View style={styles.banner}>
         <Text style={styles.bannerText}>
-          <Text style={diaryText.missionBannerTitle}>{data.banner.title}</Text>
+          <Text style={diaryText.missionBannerTitle}>{missionBanner.title}</Text>
           {'\n'}
-          <Text style={diaryText.missionBannerSubtitle}>{data.banner.subtitle}</Text>
+          <Text style={diaryText.missionBannerSubtitle}>{missionBanner.subtitle}</Text>
         </Text>
         <Image
           source={require('../../../assets/diary/banner-mascot-mission.png')}
@@ -41,8 +43,8 @@ export function MissionTab() {
 
       <View style={styles.level}>
         <View style={styles.levelRow}>
-          <Text style={styles.levelTitle}>{formatLevelTitle(data.level)}</Text>
-          <Text style={styles.levelRemaining}>{formatRemainingXp(data.level)}</Text>
+          <Text style={styles.levelTitle}>{formatLevelTitle(data.stats)}</Text>
+          <Text style={styles.levelRemaining}>{formatRemainingXp(data.stats)}</Text>
         </View>
         <View style={styles.levelTrack}>
           <View style={[styles.levelFill, { width: `${progress * 100}%` }]}>
@@ -51,7 +53,7 @@ export function MissionTab() {
               style={StyleSheet.absoluteFill}
               contentFit="cover"
             />
-            <Text style={styles.levelBadge}>{`Lv.${data.level.level}`}</Text>
+            <Text style={styles.levelBadge} numberOfLines={1}>{`Lv.${data.stats.level}`}</Text>
           </View>
         </View>
       </View>
@@ -72,7 +74,7 @@ export function MissionTab() {
           ))}
         </View>
       )}
-      {saveError && <Text style={styles.empty}>미션을 저장하지 못했어요. 다시 시도해 주세요</Text>}
+      {saveError && <Text style={styles.empty}>{saveError}</Text>}
     </ScrollView>
   );
 }
@@ -128,6 +130,7 @@ const styles = StyleSheet.create({
   },
   levelFill: {
     height: '100%',
+    minWidth: diaryLayout.levelFillMinWidth,
     justifyContent: 'center',
     paddingLeft: diaryLayout.levelLabelLeft,
     borderRadius: radius.circle,
