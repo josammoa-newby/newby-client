@@ -6,7 +6,7 @@ import { apiErrorMessage } from '@/api';
 import { ApiError } from '@/api/errors';
 import { colors, radius, spacing, typography } from '@/theme';
 import { CalendarGrid } from './CalendarGrid';
-import { diaryLayout, diaryText } from './constants';
+import { diaryColors, diaryLayout, diaryText } from './constants';
 import { DiaryError, DiaryLoading } from './DiaryStatus';
 import { useDiaryCalendar } from './useDiaryCalendar';
 import { formatMonthTitle, formatRecordMessage } from './utils';
@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: colors.white,
-    shadowColor: colors.shadow,
+    shadowColor: diaryColors.fabShadow,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 1,
     shadowRadius: diaryLayout.fabShadowRadius,
