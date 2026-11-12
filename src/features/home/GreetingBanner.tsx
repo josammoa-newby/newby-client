@@ -17,7 +17,9 @@ export function GreetingBanner({ name }: Props) {
         {name ? <Text style={styles.greeting}>{`${name}님, `}</Text> : null}
         <Text style={[styles.greeting, styles.greetingBold]}>좋은 하루에요</Text>
       </View>
-      <MiniCalendar date={new Date()} />
+      <View style={styles.calendar}>
+        <MiniCalendar date={new Date()} />
+      </View>
     </View>
   );
 }
@@ -25,10 +27,16 @@ export function GreetingBanner({ name }: Props) {
 const styles = StyleSheet.create({
   container: {
     height: homeLayout.bannerHeight,
-    gap: homeLayout.bannerGreetingToCalendar,
     paddingTop: homeLayout.bannerPaddingTop,
     paddingHorizontal: homeLayout.bannerPaddingHorizontal,
     backgroundColor: colors.primary,
+  },
+  // 이름 유무(인사말 1~2줄)와 상관없이 요일 칸이 Figma 위치(배너 상단 94)에 고정되도록 절대 배치
+  calendar: {
+    position: 'absolute',
+    top: homeLayout.bannerCalendarTop,
+    left: homeLayout.bannerPaddingHorizontal,
+    right: homeLayout.bannerPaddingHorizontal,
   },
   greeting: {
     fontFamily: fontFamily.regular,

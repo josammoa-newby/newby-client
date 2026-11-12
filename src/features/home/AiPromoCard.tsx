@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
   gradient: StyleSheet.absoluteFill,
   titleRow: {
     position: 'absolute',
-    left: 29,
+    left: 19,
     top: 26,
     flexDirection: 'row',
     alignItems: 'center',
@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     position: 'absolute',
-    left: 39,
+    left: 21,
     top: 63,
     fontFamily: fontFamily.medium,
     fontSize: 14,
@@ -99,8 +99,8 @@ const styles = StyleSheet.create({
   },
   bubbleWrap: {
     position: 'absolute',
-    left: 31,
-    top: 110,
+    left: 20,
+    top: 111,
     width: 203,
     height: 52,
     alignItems: 'center',

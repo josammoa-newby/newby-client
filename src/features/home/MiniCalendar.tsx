@@ -69,13 +69,13 @@ const styles = StyleSheet.create({
   weekday: {
     fontFamily: fontFamily.regular,
     fontSize: 11,
-    lineHeight: 14,
+    lineHeight: 16.5, // Figma leading 1.5 → 칸 높이 6+16.5+4+21+6 = 53.5
     color: colors.white,
   },
   dateNum: {
     fontFamily: fontFamily.bold,
     fontSize: 14,
-    lineHeight: 17,
+    lineHeight: 21,
     color: colors.white,
   },
   textToday: {
