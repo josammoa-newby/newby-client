@@ -1,56 +1,97 @@
 import { Image } from 'expo-image';
 import { StyleSheet, Text, View } from 'react-native';
 
-import type { AiAnswer } from '@/api';
 import { colors, radius, size, spacing, typography } from '@/theme';
+import { AVOID_LABEL, LOW_CONFIDENCE_NOTICE, SAFETY_NOTICE } from './constants';
+import type { AiAnswer } from './types';
 
 const DISCLAIMER = 'AI 답변은 참고용이에요. 상황에 맞게 판단해주세요.';
 
 // Figma: 뉴비 AI 분석 카드 (1:419)
 export function AiResultCard({ answer }: { answer: AiAnswer }) {
+  const avoid = answer.avoid?.trim();
+
   return (
-    <View style={styles.card}>
-      <View style={styles.titleRow}>
-        <Image source={require('../../../assets/ai/card-star.svg')} style={styles.star} />
-        <Text style={styles.title}>뉴비 AI 분석</Text>
-        <View style={styles.badge}>
-          <Text style={styles.badgeText}>{answer.badge}</Text>
+    <View style={styles.wrap}>
+      {answer.safetyFlag && (
+        // 안전 안내는 Figma에 없는 임시 디자인
+        <View style={styles.safety}>
+          <Text style={styles.safetyText}>{SAFETY_NOTICE}</Text>
+        </View>
+      )}
+      <View style={styles.card}>
+        <View style={styles.titleRow}>
+          <Image source={require('../../../assets/ai/card-star.svg')} style={styles.star} />
+          <Text style={styles.title}>뉴비 AI 분석</Text>
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>{answer.badge}</Text>
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>상황 해석</Text>
+          <Text style={styles.body}>{answer.interpretation}</Text>
+        </View>
+
+        <View style={styles.divider} />
+
+        <View style={[styles.section, styles.actions]}>
+          <Text style={styles.sectionLabel}>이렇게 해보세요</Text>
+          {answer.actions.map((action, index) => (
+            <View key={index} style={styles.step}>
+              <View style={styles.stepBadge}>
+                <Text style={styles.stepNumber}>{index + 1}</Text>
+              </View>
+              <Text style={[typography.body, styles.stepText]}>{action}</Text>
+            </View>
+          ))}
+        </View>
+
+        <View style={styles.phrase}>
+          <Text style={styles.phraseLabel}>추천 말투</Text>
+          <Text style={styles.body}>{answer.suggestedPhrase}</Text>
+        </View>
+
+        {avoid ? (
+          <View style={styles.section}>
+            <Text style={styles.sectionLabel}>{AVOID_LABEL}</Text>
+            <Text style={styles.body}>{avoid}</Text>
+          </View>
+        ) : null}
+
+        <View style={styles.disclaimer}>
+          <Text style={[typography.caption, styles.disclaimerText]}>ⓘ</Text>
+          <Text style={[typography.disclaimer, styles.disclaimerText]}>{DISCLAIMER}</Text>
         </View>
       </View>
-
-      <View style={styles.section}>
-        <Text style={styles.sectionLabel}>상황 해석</Text>
-        <Text style={styles.body}>{answer.interpretation}</Text>
-      </View>
-
-      <View style={styles.divider} />
-
-      <View style={[styles.section, styles.actions]}>
-        <Text style={styles.sectionLabel}>이렇게 해보세요</Text>
-        {answer.actions.map((action, index) => (
-          <View key={index} style={styles.step}>
-            <View style={styles.stepBadge}>
-              <Text style={styles.stepNumber}>{index + 1}</Text>
-            </View>
-            <Text style={[typography.body, styles.stepText]}>{action}</Text>
-          </View>
-        ))}
-      </View>
-
-      <View style={styles.phrase}>
-        <Text style={styles.phraseLabel}>추천 말투</Text>
-        <Text style={styles.body}>{answer.suggestedPhrase}</Text>
-      </View>
-
-      <View style={styles.disclaimer}>
-        <Text style={[typography.caption, styles.disclaimerText]}>ⓘ</Text>
-        <Text style={[typography.disclaimer, styles.disclaimerText]}>{DISCLAIMER}</Text>
-      </View>
+      {answer.confidence === 'low' && <Text style={styles.lowConfidence}>{LOW_CONFIDENCE_NOTICE}</Text>}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  wrap: {
+    gap: spacing.sm,
+  },
+  safety: {
+    alignSelf: 'stretch',
+    maxWidth: size.aiCardMaxWidth,
+    marginLeft: spacing.lg,
+    padding: spacing.lg,
+    borderRadius: radius.input,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    backgroundColor: colors.surfaceSelected,
+  },
+  safetyText: {
+    ...typography.answerBody,
+    color: colors.textPrimary,
+  },
+  lowConfidence: {
+    ...typography.caption,
+    marginLeft: spacing.lg,
+    color: colors.textMuted,
+  },
   card: {
     alignSelf: 'stretch',
     maxWidth: size.aiCardMaxWidth,

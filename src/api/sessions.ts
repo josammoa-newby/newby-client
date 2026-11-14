@@ -38,8 +38,8 @@ export type SendMessageResult = {
   aiMessage: ChatMessage;
 };
 
-// AI 응답은 느릴 수 있어 이 호출만 타임아웃을 40초로 한다.
-const SEND_MESSAGE_TIMEOUT_MS = 40000;
+// 서버 최악의 경우가 약 60초(내부 재질문 1회)라, 클라이언트가 먼저 끊어 화면과 서버 저장이 어긋나지 않게 65초로 한다.
+const SEND_MESSAGE_TIMEOUT_MS = 65000;
 
 const sessionPath = (id: string) => `/api/sessions/${encodeURIComponent(id)}`;
 

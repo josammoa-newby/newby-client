@@ -3,15 +3,6 @@ import { ApiError } from './errors';
 import * as tokenStorage from './tokenStorage';
 import type { AuthTokens } from './types';
 
-// 서버가 준비되기 전까지 mock 응답을 돌려주기 위한 공통 헬퍼.
-// 서버 연동 시 각 API 함수 내부만 실제 요청으로 교체한다.
-const MOCK_DELAY_MS = 300;
-
-export async function mockResponse<T>(data: T, delayMs: number = MOCK_DELAY_MS): Promise<T> {
-  await new Promise((resolve) => setTimeout(resolve, delayMs));
-  return data;
-}
-
 // ---- 실제 서버 호출 ----
 const REQUEST_TIMEOUT_MS = 15000;
 const NETWORK_ERROR_MESSAGE = '네트워크 연결을 확인해주세요';
