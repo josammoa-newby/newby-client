@@ -56,11 +56,12 @@ export default function Ai() {
 
   const ready = chat.supervisorState === 'ready';
   const last = chat.turns[chat.turns.length - 1];
-  // 피드백 박스는 가장 최근 답변에만 보인다. 새 답변이 오면 이전 답변의 박스(결과 문구 포함)는 사라진다.
+  // 피드백 박스는 후속 질문이 없는 가장 최근 답변에만 보인다. 새 답변이 오면 이전 답변의 박스(결과 문구 포함)는 사라진다.
   // 단, 이전 답변에서 사유를 입력 중/전송 중/실패(재시도 대기)이면 입력이 날아가지 않도록 박스를 유지한다
   const latestAnswerId = [...chat.turns].reverse().find((turn) => turn.answer && turn.aiMessageId)?.id;
   const showFeedback = (turn: Turn): boolean => {
-    if (turn.id === latestAnswerId) return true;
+    // 후속 질문이 있는 답변에는 평가를 같이 요구하지 않는다 (adapter 가 null/빈 문자열을 빈 배열로 만든다)
+    if (turn.id === latestAnswerId && (turn.answer?.followUps.length ?? 0) === 0) return true;
     const status = turn.aiMessageId ? feedback.get(turn.aiMessageId).status : 'idle';
     return status === 'inputting' || status === 'sending' || status === 'error';
   };
