@@ -17,15 +17,17 @@ import { AiMascot, Button, ChatInputBar } from '@/components';
 import { AiHeader } from '@/features/ai/AiHeader';
 import { AiResultCard } from '@/features/ai/AiResultCard';
 import {
+  FOLLOW_UP_HINT,
   MAX_MESSAGE_LENGTH,
   NO_SUPERVISOR_BUTTON,
   NO_SUPERVISOR_MESSAGE,
   RETRY_LABEL,
   THINKING_MESSAGE,
 } from '@/features/ai/constants';
-import { FollowUpChip } from '@/features/ai/FollowUpChip';
+import { FeedbackBox } from '@/features/ai/FeedbackBox';
 import { SuggestionCard } from '@/features/ai/SuggestionCard';
-import { useAiChat } from '@/features/ai/useAiChat';
+import { useAiChat, type Turn } from '@/features/ai/useAiChat';
+import { useAiFeedback } from '@/features/ai/useAiFeedback';
 import { UserBubble } from '@/features/ai/UserBubble';
 import { colors, spacing, typography } from '@/theme';
 
@@ -50,9 +52,19 @@ export default function Ai() {
   const scrollRef = useRef<ScrollViewInstance>(null);
   const [input, setInput] = useState('');
   const chat = useAiChat();
+  const feedback = useAiFeedback();
 
   const ready = chat.supervisorState === 'ready';
   const last = chat.turns[chat.turns.length - 1];
+  // 피드백 박스는 후속 질문이 없는 가장 최근 답변에만 보인다. 새 답변이 오면 이전 답변의 박스(결과 문구 포함)는 사라진다.
+  // 단, 이전 답변에서 사유를 입력 중/전송 중/실패(재시도 대기)이면 입력이 날아가지 않도록 박스를 유지한다
+  const latestAnswerId = [...chat.turns].reverse().find((turn) => turn.answer && turn.aiMessageId)?.id;
+  const showFeedback = (turn: Turn): boolean => {
+    // 후속 질문이 있는 답변에는 평가를 같이 요구하지 않는다 (adapter 가 null/빈 문자열을 빈 배열로 만든다)
+    if (turn.id === latestAnswerId && (turn.answer?.followUps.length ?? 0) === 0) return true;
+    const status = turn.aiMessageId ? feedback.get(turn.aiMessageId).status : 'idle';
+    return status === 'inputting' || status === 'sending' || status === 'error';
+  };
 
   const submit = () => {
     const text = input;
@@ -144,10 +156,31 @@ export default function Ai() {
               </View>
             )}
             {turn.answer && <AiResultCard answer={turn.answer} />}
+            {turn.answer && turn.answer.followUps.length > 0 && (
+              // 후속 질문은 AI가 묻는 문장일 뿐이라 누를 수 없는 일반 텍스트로, 모든 답변 아래에 남겨 둔다
+              <View style={styles.followUp}>
+                <Text style={styles.followUpHint}>{FOLLOW_UP_HINT}</Text>
+                {turn.answer.followUps.map((followUp) => (
+                  <Text key={followUp} style={styles.followUpText}>
+                    {followUp}
+                  </Text>
+                ))}
+              </View>
+            )}
+            {turn.answer && turn.aiMessageId && showFeedback(turn) && (
+              <FeedbackBox
+                state={feedback.get(turn.aiMessageId)}
+                onHelpful={() => feedback.submit(turn.aiMessageId!, true)}
+                onNotHelpful={() => feedback.openReason(turn.aiMessageId!)}
+                onReasonChange={(text) => feedback.setReason(turn.aiMessageId!, text)}
+                onSendReason={() =>
+                  feedback.submit(turn.aiMessageId!, false, feedback.get(turn.aiMessageId!).reason)
+                }
+                onSkipReason={() => feedback.submit(turn.aiMessageId!, false)}
+                onRetry={() => feedback.submit(turn.aiMessageId!, true)}
+              />
+            )}
           </View>
-        ))}
-        {last?.answer?.followUps.map((followUp) => (
-          <FollowUpChip key={followUp} text={followUp} onPress={() => chat.send(followUp)} />
         ))}
       </ScrollView>
     );
@@ -227,6 +260,18 @@ const styles = StyleSheet.create({
   loadingText: {
     ...typography.caption,
     color: colors.textMuted,
+  },
+  followUp: {
+    gap: spacing.xs,
+    marginLeft: spacing.lg,
+  },
+  followUpHint: {
+    ...typography.caption,
+    color: colors.textMuted,
+  },
+  followUpText: {
+    ...typography.body,
+    color: colors.textLabel,
   },
   errorBox: {
     gap: spacing.sm,
