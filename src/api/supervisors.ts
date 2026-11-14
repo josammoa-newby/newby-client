@@ -1,5 +1,5 @@
 import { request } from './client';
-import type { PersonaAxis, PersonaMode } from './persona';
+import type { PersonaAnswer, PersonaAxis, PersonaMode } from './persona';
 
 export type SupervisorChannel = 'messenger' | 'face' | 'email';
 
@@ -13,8 +13,8 @@ export type CreateSupervisorInput = {
   position?: string;
   channel?: SupervisorChannel;
   mode?: PersonaMode;
-  // 문항 id -> 값. 리커트는 1~5 정수, 상황형은 'a'~'d'
-  answers: Record<string, unknown>;
+  // 문항 id -> 값. 리커트는 1~5 정수, 상황형은 'a'~'d'. 선택한 mode 의 문항이 모두 있어야 한다
+  answers: Record<string, PersonaAnswer>;
   catchphrases?: string[];
   angerSignals?: string;
   happySignals?: string;
