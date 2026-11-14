@@ -6,6 +6,7 @@ import type { SupervisorListItem } from '@/api';
 import { ApiError } from '@/api/errors';
 import { toAiAnswer } from './adapter';
 import { MAX_MESSAGE_LENGTH } from './constants';
+import { hasEmptyAnswer } from './followUp';
 import type { AiAnswer } from './types';
 
 export type Turn = {
@@ -146,7 +147,7 @@ export function useAiChat() {
   const send = useCallback(
     (text: string) => {
       const question = text.trim();
-      if (question.length === 0 || question.length > MAX_MESSAGE_LENGTH) return;
+      if (question.length === 0 || question.length > MAX_MESSAGE_LENGTH || hasEmptyAnswer(question)) return;
       void run(question);
     },
     [run],

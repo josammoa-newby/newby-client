@@ -1,6 +1,7 @@
 // AI 탭 문구 (Figma에 없는 임시 문구 포함)
 export const MAX_MESSAGE_LENGTH = 1000;
 
+export const FOLLOW_UP_HINT = '더 정확하게 도와드리려고 AI가 물어봐요';
 export const THINKING_MESSAGE = '생각하고 있어요';
 export const AVOID_LABEL = '이런 말은 피하세요';
 export const LOW_CONFIDENCE_NOTICE = '확실하지 않아요. 상사가 한 말을 그대로 적어주면 더 정확해져요';

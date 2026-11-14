@@ -1,4 +1,5 @@
 import { Image } from 'expo-image';
+import type { ComponentRef, Ref } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { colors, opacity, radius, size, spacing, typography } from '@/theme';
@@ -13,6 +14,8 @@ type Props = {
   maxLength?: number;
   // false 이면 입력을 막는다 (상사 정보 로딩 중 등)
   editable?: boolean;
+  // 입력창에 포커스를 주기 위한 ref (후속 질문 칩 등)
+  inputRef?: Ref<ComponentRef<typeof TextInput>>;
 };
 
 // 전송 아이콘은 벡터 2개(비행기 1:387, 점 1:388)를 40px 버튼 안에 배치한다.
@@ -33,12 +36,14 @@ export function ChatInputBar({
   sendDisabled = false,
   maxLength,
   editable = true,
+  inputRef,
 }: Props) {
   return (
     <View style={styles.container}>
       <Image source={require('../../assets/ai/plus.svg')} style={styles.plus} />
       <View style={styles.field}>
         <TextInput
+          ref={inputRef}
           value={value}
           onChangeText={onChangeText}
           onSubmitEditing={onSubmit}

@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { useRef, useState } from 'react';
+import { useRef, useState, type ComponentRef } from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -9,6 +9,7 @@ import {
   type ScrollViewInstance,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -17,6 +18,7 @@ import { AiMascot, Button, ChatInputBar } from '@/components';
 import { AiHeader } from '@/features/ai/AiHeader';
 import { AiResultCard } from '@/features/ai/AiResultCard';
 import {
+  FOLLOW_UP_HINT,
   MAX_MESSAGE_LENGTH,
   NO_SUPERVISOR_BUTTON,
   NO_SUPERVISOR_MESSAGE,
@@ -24,6 +26,7 @@ import {
   THINKING_MESSAGE,
 } from '@/features/ai/constants';
 import { FeedbackBox } from '@/features/ai/FeedbackBox';
+import { buildFollowUpInput, hasEmptyAnswer } from '@/features/ai/followUp';
 import { FollowUpChip } from '@/features/ai/FollowUpChip';
 import { SuggestionCard } from '@/features/ai/SuggestionCard';
 import { useAiChat } from '@/features/ai/useAiChat';
@@ -50,6 +53,7 @@ const SUGGESTIONS = [
 export default function Ai() {
   const insets = useSafeAreaInsets();
   const scrollRef = useRef<ScrollViewInstance>(null);
+  const inputRef = useRef<ComponentRef<typeof TextInput>>(null);
   const [input, setInput] = useState('');
   const chat = useAiChat();
   const feedback = useAiFeedback();
@@ -57,9 +61,23 @@ export default function Ai() {
   const ready = chat.supervisorState === 'ready';
   const last = chat.turns[chat.turns.length - 1];
 
+  // 칩 질문이 채워져 있고 답이 비어 있으면 전송할 수 없다
+  const answerEmpty = hasEmptyAnswer(input);
+
+  // 후속 질문 칩: 전송하지 않고 입력창에 '질문 + 줄바꿈 + 답: ' 을 채워 사용자가 이어서 답하게 한다
+  const fillFollowUp = (question: string) => {
+    const next = buildFollowUpInput(input, question);
+    setInput(next);
+    // 값이 반영된 뒤 포커스를 주고 커서를 끝으로 보낸다
+    setTimeout(() => {
+      inputRef.current?.focus();
+      inputRef.current?.setSelection?.(next.length, next.length);
+    }, 0);
+  };
+
   const submit = () => {
     const text = input;
-    if (!ready || chat.loading || !text.trim()) return;
+    if (!ready || chat.loading || !text.trim() || answerEmpty) return;
     setInput('');
     chat.send(text);
   };
@@ -162,8 +180,11 @@ export default function Ai() {
             )}
           </View>
         ))}
+        {last?.answer && last.answer.followUps.length > 0 && (
+          <Text style={styles.followUpHint}>{FOLLOW_UP_HINT}</Text>
+        )}
         {last?.answer?.followUps.map((followUp) => (
-          <FollowUpChip key={followUp} text={followUp} onPress={() => chat.send(followUp)} />
+          <FollowUpChip key={followUp} text={followUp} onPress={() => fillFollowUp(followUp)} />
         ))}
       </ScrollView>
     );
@@ -186,7 +207,8 @@ export default function Ai() {
             onSubmit={submit}
             maxLength={MAX_MESSAGE_LENGTH}
             editable={ready}
-            sendDisabled={!ready || chat.loading || !input.trim()}
+            inputRef={inputRef}
+            sendDisabled={!ready || chat.loading || !input.trim() || answerEmpty}
           />
         )}
       </KeyboardAvoidingView>
@@ -242,6 +264,11 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     ...typography.caption,
+    color: colors.textMuted,
+  },
+  followUpHint: {
+    ...typography.caption,
+    marginLeft: spacing.lg,
     color: colors.textMuted,
   },
   errorBox: {
