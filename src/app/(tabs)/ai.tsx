@@ -23,9 +23,11 @@ import {
   RETRY_LABEL,
   THINKING_MESSAGE,
 } from '@/features/ai/constants';
+import { FeedbackBox } from '@/features/ai/FeedbackBox';
 import { FollowUpChip } from '@/features/ai/FollowUpChip';
 import { SuggestionCard } from '@/features/ai/SuggestionCard';
 import { useAiChat } from '@/features/ai/useAiChat';
+import { useAiFeedback } from '@/features/ai/useAiFeedback';
 import { UserBubble } from '@/features/ai/UserBubble';
 import { colors, spacing, typography } from '@/theme';
 
@@ -50,6 +52,7 @@ export default function Ai() {
   const scrollRef = useRef<ScrollViewInstance>(null);
   const [input, setInput] = useState('');
   const chat = useAiChat();
+  const feedback = useAiFeedback();
 
   const ready = chat.supervisorState === 'ready';
   const last = chat.turns[chat.turns.length - 1];
@@ -144,6 +147,19 @@ export default function Ai() {
               </View>
             )}
             {turn.answer && <AiResultCard answer={turn.answer} />}
+            {turn.answer && turn.aiMessageId && (
+              <FeedbackBox
+                state={feedback.get(turn.aiMessageId)}
+                onHelpful={() => feedback.submit(turn.aiMessageId!, true)}
+                onNotHelpful={() => feedback.openReason(turn.aiMessageId!)}
+                onReasonChange={(text) => feedback.setReason(turn.aiMessageId!, text)}
+                onSendReason={() =>
+                  feedback.submit(turn.aiMessageId!, false, feedback.get(turn.aiMessageId!).reason)
+                }
+                onSkipReason={() => feedback.submit(turn.aiMessageId!, false)}
+                onRetry={() => feedback.submit(turn.aiMessageId!, true)}
+              />
+            )}
           </View>
         ))}
         {last?.answer?.followUps.map((followUp) => (

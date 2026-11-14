@@ -13,6 +13,8 @@ export type Turn = {
   question: string;
   status: 'loading' | 'done' | 'error';
   answer?: AiAnswer;
+  // 답변(AI 메시지) id. 피드백을 남길 때 쓴다
+  aiMessageId?: string;
   error?: string;
 };
 
@@ -84,7 +86,7 @@ export function useAiChat() {
   }, []);
 
   const ask = useCallback(
-    async (question: string): Promise<AiAnswer> => {
+    async (question: string): Promise<{ answer: AiAnswer; aiMessageId: string }> => {
       const target = supervisorRef.current;
       if (!target) throw new ApiError('SUPERVISOR_NOT_FOUND', '상사 정보를 찾을 수 없어요');
 
@@ -100,7 +102,7 @@ export function useAiChat() {
 
       const payload = result.aiMessage.payload;
       if (!payload) throw new ApiError('AI_RESPONSE_INVALID', 'AI 답변 형식이 올바르지 않아요');
-      return toAiAnswer(payload, target);
+      return { answer: toAiAnswer(payload, target), aiMessageId: result.aiMessage.id };
     },
     [ensureSession],
   );
@@ -125,8 +127,8 @@ export function useAiChat() {
       }
 
       try {
-        const answer = await ask(question);
-        if (mounted.current) patchTurn(id, { status: 'done', answer });
+        const { answer, aiMessageId } = await ask(question);
+        if (mounted.current) patchTurn(id, { status: 'done', answer, aiMessageId });
       } catch (e) {
         if (isCode(e, 'SUPERVISOR_NOT_FOUND')) {
           // 상사가 삭제/변경된 경우: 세션을 버리고 목록을 다시 확인한다
