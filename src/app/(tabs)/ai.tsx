@@ -26,7 +26,7 @@ import {
 } from '@/features/ai/constants';
 import { FeedbackBox } from '@/features/ai/FeedbackBox';
 import { SuggestionCard } from '@/features/ai/SuggestionCard';
-import { useAiChat } from '@/features/ai/useAiChat';
+import { useAiChat, type Turn } from '@/features/ai/useAiChat';
 import { useAiFeedback } from '@/features/ai/useAiFeedback';
 import { UserBubble } from '@/features/ai/UserBubble';
 import { colors, spacing, typography } from '@/theme';
@@ -56,6 +56,14 @@ export default function Ai() {
 
   const ready = chat.supervisorState === 'ready';
   const last = chat.turns[chat.turns.length - 1];
+  // 피드백 박스는 가장 최근 답변에만 보인다. 새 답변이 오면 이전 답변의 박스(결과 문구 포함)는 사라진다.
+  // 단, 이전 답변에서 사유를 입력 중/전송 중/실패(재시도 대기)이면 입력이 날아가지 않도록 박스를 유지한다
+  const latestAnswerId = [...chat.turns].reverse().find((turn) => turn.answer && turn.aiMessageId)?.id;
+  const showFeedback = (turn: Turn): boolean => {
+    if (turn.id === latestAnswerId) return true;
+    const status = turn.aiMessageId ? feedback.get(turn.aiMessageId).status : 'idle';
+    return status === 'inputting' || status === 'sending' || status === 'error';
+  };
 
   const submit = () => {
     const text = input;
@@ -147,7 +155,18 @@ export default function Ai() {
               </View>
             )}
             {turn.answer && <AiResultCard answer={turn.answer} />}
-            {turn.answer && turn.aiMessageId && (
+            {turn.answer && turn.answer.followUps.length > 0 && (
+              // 후속 질문은 AI가 묻는 문장일 뿐이라 누를 수 없는 일반 텍스트로, 모든 답변 아래에 남겨 둔다
+              <View style={styles.followUp}>
+                <Text style={styles.followUpHint}>{FOLLOW_UP_HINT}</Text>
+                {turn.answer.followUps.map((followUp) => (
+                  <Text key={followUp} style={styles.followUpText}>
+                    {followUp}
+                  </Text>
+                ))}
+              </View>
+            )}
+            {turn.answer && turn.aiMessageId && showFeedback(turn) && (
               <FeedbackBox
                 state={feedback.get(turn.aiMessageId)}
                 onHelpful={() => feedback.submit(turn.aiMessageId!, true)}
@@ -162,17 +181,6 @@ export default function Ai() {
             )}
           </View>
         ))}
-        {last?.answer && last.answer.followUps.length > 0 && (
-          // 후속 질문은 AI가 묻는 문장일 뿐이라 누를 수 없는 일반 텍스트로 보여준다
-          <View style={styles.followUp}>
-            <Text style={styles.followUpHint}>{FOLLOW_UP_HINT}</Text>
-            {last.answer.followUps.map((followUp) => (
-              <Text key={followUp} style={styles.followUpText}>
-                {followUp}
-              </Text>
-            ))}
-          </View>
-        )}
       </ScrollView>
     );
   };
