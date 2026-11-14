@@ -1,8 +1,10 @@
+import { router } from 'expo-router';
 import { useRef, useState } from 'react';
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   ScrollView,
   type ScrollViewInstance,
   StyleSheet,
@@ -11,17 +13,21 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { askAI, type AiAnswer } from '@/api';
-import { AiMascot, ChatInputBar } from '@/components';
+import { AiMascot, Button, ChatInputBar } from '@/components';
 import { AiHeader } from '@/features/ai/AiHeader';
 import { AiResultCard } from '@/features/ai/AiResultCard';
+import {
+  MAX_MESSAGE_LENGTH,
+  NO_SUPERVISOR_BUTTON,
+  NO_SUPERVISOR_MESSAGE,
+  RETRY_LABEL,
+  THINKING_MESSAGE,
+} from '@/features/ai/constants';
 import { FollowUpChip } from '@/features/ai/FollowUpChip';
 import { SuggestionCard } from '@/features/ai/SuggestionCard';
+import { useAiChat } from '@/features/ai/useAiChat';
 import { UserBubble } from '@/features/ai/UserBubble';
 import { colors, spacing, typography } from '@/theme';
-
-// 에러 문구는 Figma에 없는 임시 디자인
-const MESSAGE_FAILED = '답변을 불러오지 못했어요. 잠시 후 다시 시도해주세요';
 
 // 예시 질문 카드. Figma 에는 카드 문구만 있어 눌렀을 때 보낼 질문 문장은 임의로 정함
 const SUGGESTIONS = [
@@ -37,40 +43,117 @@ const SUGGESTIONS = [
   },
 ];
 
-type Turn = {
-  id: number;
-  question: string;
-  status: 'loading' | 'done' | 'error';
-  answer?: AiAnswer;
-};
-
-// 질문이 없으면 입력 상태(Figma 1:372), 질문을 보내면 결과 상태(Figma 1:408)를 같은 화면에서 보여줌
+// 질문이 없으면 입력 상태(Figma 1:372), 질문을 보내면 결과 상태(Figma 1:408)를 같은 화면에서 보여줌.
+// 상사/세션/전송 로직은 useAiChat 이 맡고 이 파일은 그리기만 한다
 export default function Ai() {
   const insets = useSafeAreaInsets();
   const scrollRef = useRef<ScrollViewInstance>(null);
-  const nextId = useRef(0);
   const [input, setInput] = useState('');
-  const [turns, setTurns] = useState<Turn[]>([]);
+  const chat = useAiChat();
 
-  const last = turns[turns.length - 1];
-  const loading = last?.status === 'loading';
+  const ready = chat.supervisorState === 'ready';
+  const last = chat.turns[chat.turns.length - 1];
 
-  const update = (id: number, patch: Partial<Turn>) =>
-    setTurns((prev) => prev.map((turn) => (turn.id === id ? { ...turn, ...patch } : turn)));
-
-  const send = async (text: string) => {
-    const question = text.trim();
-    if (!question || loading) return;
-
-    const id = nextId.current++;
+  const submit = () => {
+    const text = input;
+    if (!ready || chat.loading || !text.trim()) return;
     setInput('');
-    setTurns((prev) => [...prev, { id, question, status: 'loading' }]);
-    try {
-      update(id, { status: 'done', answer: await askAI({ question }) });
-    } catch {
-      update(id, { status: 'error' });
-    }
+    chat.send(text);
   };
+
+  const renderBody = () => {
+    if (chat.supervisorState === 'empty') {
+      // 등록한 상사가 없으면 입력 대신 등록 유도 (임시 디자인)
+      return (
+        <View style={styles.hero}>
+          <Text style={styles.notice}>{NO_SUPERVISOR_MESSAGE}</Text>
+          <Button
+            title={NO_SUPERVISOR_BUTTON}
+            onPress={() => router.push('/supervisors')}
+            style={styles.noticeButton}
+          />
+        </View>
+      );
+    }
+    if (chat.supervisorState === 'error') {
+      return (
+        <View style={styles.hero}>
+          <Text style={styles.notice}>{chat.supervisorError}</Text>
+          <Button title={RETRY_LABEL} onPress={chat.retryLoadSupervisor} style={styles.noticeButton} />
+        </View>
+      );
+    }
+    if (chat.turns.length === 0) {
+      return (
+        <>
+          <View style={styles.hero}>
+            <AiMascot />
+            <Text style={styles.headline}>언제 어디서든, 뉴비 AI</Text>
+            <Text style={styles.subline}>혼자 고민하지 마세요, 바로 물어보세요</Text>
+          </View>
+          <ScrollView
+            horizontal
+            keyboardShouldPersistTaps="handled"
+            showsHorizontalScrollIndicator={false}
+            style={styles.suggestions}
+            contentContainerStyle={styles.suggestionsContent}
+          >
+            {SUGGESTIONS.map((item) => (
+              <SuggestionCard
+                key={item.title}
+                title={item.title}
+                description={item.description}
+                onPress={() => ready && chat.send(item.question)}
+              />
+            ))}
+          </ScrollView>
+        </>
+      );
+    }
+    return (
+      <ScrollView
+        ref={scrollRef}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        style={styles.flex}
+        contentContainerStyle={styles.chat}
+        onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: true })}
+      >
+        {chat.turns.map((turn) => (
+          <View key={turn.id} style={styles.turn}>
+            <UserBubble text={turn.question} />
+            {turn.status === 'loading' && (
+              // 로딩 표시는 Figma에 없는 임시 디자인
+              <View style={styles.loading}>
+                <ActivityIndicator color={colors.primary} />
+                <Text style={styles.loadingText}>{THINKING_MESSAGE}</Text>
+              </View>
+            )}
+            {turn.status === 'error' && (
+              <View style={styles.errorBox}>
+                <Text style={styles.error}>{turn.error}</Text>
+                {turn.id === last?.id && (
+                  <Pressable
+                    accessibilityRole="button"
+                    onPress={() => chat.retry(turn.id)}
+                    style={styles.retry}
+                  >
+                    <Text style={styles.retryText}>{RETRY_LABEL}</Text>
+                  </Pressable>
+                )}
+              </View>
+            )}
+            {turn.answer && <AiResultCard answer={turn.answer} />}
+          </View>
+        ))}
+        {last?.answer?.followUps.map((followUp) => (
+          <FollowUpChip key={followUp} text={followUp} onPress={() => chat.send(followUp)} />
+        ))}
+      </ScrollView>
+    );
+  };
+
+  const showInput = chat.supervisorState !== 'empty' && chat.supervisorState !== 'error';
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -79,63 +162,17 @@ export default function Ai() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <AiHeader />
-
-        {turns.length === 0 ? (
-          <>
-            <View style={styles.hero}>
-              <AiMascot />
-              <Text style={styles.headline}>언제 어디서든, 뉴비 AI</Text>
-              <Text style={styles.subline}>혼자 고민하지 마세요, 바로 물어보세요</Text>
-            </View>
-            <ScrollView
-              horizontal
-              keyboardShouldPersistTaps="handled"
-              showsHorizontalScrollIndicator={false}
-              style={styles.suggestions}
-              contentContainerStyle={styles.suggestionsContent}
-            >
-              {SUGGESTIONS.map((item) => (
-                <SuggestionCard
-                  key={item.title}
-                  title={item.title}
-                  description={item.description}
-                  onPress={() => send(item.question)}
-                />
-              ))}
-            </ScrollView>
-          </>
-        ) : (
-          <ScrollView
-            ref={scrollRef}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-            style={styles.flex}
-            contentContainerStyle={styles.chat}
-            onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: true })}
-          >
-            {turns.map((turn) => (
-              <View key={turn.id} style={styles.turn}>
-                <UserBubble text={turn.question} />
-                {turn.status === 'loading' && (
-                  // 로딩 표시는 Figma에 없는 임시 디자인
-                  <ActivityIndicator color={colors.primary} style={styles.loading} />
-                )}
-                {turn.status === 'error' && <Text style={styles.error}>{MESSAGE_FAILED}</Text>}
-                {turn.answer && <AiResultCard answer={turn.answer} />}
-              </View>
-            ))}
-            {last?.answer?.followUps.map((followUp) => (
-              <FollowUpChip key={followUp} text={followUp} onPress={() => send(followUp)} />
-            ))}
-          </ScrollView>
+        {renderBody()}
+        {showInput && (
+          <ChatInputBar
+            value={input}
+            onChangeText={setInput}
+            onSubmit={submit}
+            maxLength={MAX_MESSAGE_LENGTH}
+            editable={ready}
+            sendDisabled={!ready || chat.loading || !input.trim()}
+          />
         )}
-
-        <ChatInputBar
-          value={input}
-          onChangeText={setInput}
-          onSubmit={() => send(input)}
-          sendDisabled={loading || !input.trim()}
-        />
       </KeyboardAvoidingView>
     </View>
   );
@@ -181,12 +218,40 @@ const styles = StyleSheet.create({
     gap: spacing.chatGap,
   },
   loading: {
+    flexDirection: 'row',
+    alignItems: 'center',
     alignSelf: 'flex-start',
+    gap: spacing.sm,
     marginLeft: spacing.xl,
+  },
+  loadingText: {
+    ...typography.caption,
+    color: colors.textMuted,
+  },
+  errorBox: {
+    gap: spacing.sm,
+    marginLeft: spacing.lg,
   },
   error: {
     ...typography.caption,
-    marginLeft: spacing.lg,
     color: colors.textMuted,
+  },
+  retry: {
+    alignSelf: 'flex-start',
+    paddingVertical: spacing.xs,
+  },
+  retryText: {
+    ...typography.action,
+    color: colors.primaryDark,
+  },
+  notice: {
+    ...typography.body,
+    textAlign: 'center',
+    color: colors.textMuted,
+  },
+  noticeButton: {
+    alignSelf: 'center',
+    marginTop: spacing.lg,
+    paddingHorizontal: spacing.xl,
   },
 });

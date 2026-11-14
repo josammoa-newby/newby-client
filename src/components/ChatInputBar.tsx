@@ -9,6 +9,10 @@ type Props = {
   onSubmit: () => void;
   // true 이면 전송 버튼을 비활성 표시하고 전송하지 않음 (빈 입력, 응답 대기 중)
   sendDisabled?: boolean;
+  // 입력 글자 수 제한 (서버 메시지 1000자)
+  maxLength?: number;
+  // false 이면 입력을 막는다 (상사 정보 로딩 중 등)
+  editable?: boolean;
 };
 
 // 전송 아이콘은 벡터 2개(비행기 1:387, 점 1:388)를 40px 버튼 안에 배치한다.
@@ -22,7 +26,14 @@ const INPUT_LINE_HEIGHT = typography.chatInput.lineHeight;
 const INPUT_MAX_LINES = 4;
 
 // Figma: AI 입력창 (1:380), 결과 화면 (1:454)
-export function ChatInputBar({ value, onChangeText, onSubmit, sendDisabled = false }: Props) {
+export function ChatInputBar({
+  value,
+  onChangeText,
+  onSubmit,
+  sendDisabled = false,
+  maxLength,
+  editable = true,
+}: Props) {
   return (
     <View style={styles.container}>
       <Image source={require('../../assets/ai/plus.svg')} style={styles.plus} />
@@ -31,6 +42,8 @@ export function ChatInputBar({ value, onChangeText, onSubmit, sendDisabled = fal
           value={value}
           onChangeText={onChangeText}
           onSubmitEditing={onSubmit}
+          maxLength={maxLength}
+          editable={editable}
           placeholder="지금 떠오르는 생각을 적어보세요"
           placeholderTextColor={colors.chatPlaceholder}
           returnKeyType="send"
