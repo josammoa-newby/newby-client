@@ -21,13 +21,18 @@ import {
   MAX_MESSAGE_LENGTH,
   NO_SUPERVISOR_BUTTON,
   NO_SUPERVISOR_MESSAGE,
+  RESTORE_RETRY_LABEL,
+  RESTORING_MESSAGE,
   RETRY_LABEL,
   THINKING_MESSAGE,
 } from '@/features/ai/constants';
 import { FeedbackBox } from '@/features/ai/FeedbackBox';
 import { SuggestionCard } from '@/features/ai/SuggestionCard';
+import { SupervisorBar } from '@/features/ai/SupervisorBar';
+import { SupervisorPickerModal } from '@/features/ai/SupervisorPickerModal';
 import { useAiChat, type Turn } from '@/features/ai/useAiChat';
 import { useAiFeedback } from '@/features/ai/useAiFeedback';
+import { useSupervisorSelection } from '@/features/ai/useSupervisorSelection';
 import { UserBubble } from '@/features/ai/UserBubble';
 import { colors, spacing, typography } from '@/theme';
 
@@ -51,10 +56,14 @@ export default function Ai() {
   const insets = useSafeAreaInsets();
   const scrollRef = useRef<ScrollViewInstance>(null);
   const [input, setInput] = useState('');
-  const chat = useAiChat();
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const selection = useSupervisorSelection();
+  const chat = useAiChat({ supervisor: selection.supervisor, onSupervisorMissing: selection.reload });
   const feedback = useAiFeedback();
 
-  const ready = chat.supervisorState === 'ready';
+  const restoring = chat.restoreState === 'loading';
+  // 상사가 정해졌고 대화 복원 중이 아닐 때만 입력/전송할 수 있다
+  const ready = selection.state === 'ready' && !restoring;
   const last = chat.turns[chat.turns.length - 1];
   // 피드백 박스는 후속 질문이 없는 가장 최근 답변에만 보인다. 새 답변이 오면 이전 답변의 박스(결과 문구 포함)는 사라진다.
   // 단, 이전 답변에서 사유를 입력 중/전송 중/실패(재시도 대기)이면 입력이 날아가지 않도록 박스를 유지한다
@@ -74,7 +83,7 @@ export default function Ai() {
   };
 
   const renderBody = () => {
-    if (chat.supervisorState === 'empty') {
+    if (selection.state === 'empty') {
       // 등록한 상사가 없으면 입력 대신 등록 유도 (임시 디자인)
       return (
         <View style={styles.hero}>
@@ -87,11 +96,20 @@ export default function Ai() {
         </View>
       );
     }
-    if (chat.supervisorState === 'error') {
+    if (selection.state === 'error') {
       return (
         <View style={styles.hero}>
-          <Text style={styles.notice}>{chat.supervisorError}</Text>
-          <Button title={RETRY_LABEL} onPress={chat.retryLoadSupervisor} style={styles.noticeButton} />
+          <Text style={styles.notice}>{selection.error}</Text>
+          <Button title={RETRY_LABEL} onPress={selection.retry} style={styles.noticeButton} />
+        </View>
+      );
+    }
+    if (restoring) {
+      // 대화 복원 중 로딩 (임시 디자인)
+      return (
+        <View style={styles.hero}>
+          <ActivityIndicator color={colors.primary} />
+          <Text style={styles.notice}>{RESTORING_MESSAGE}</Text>
         </View>
       );
     }
@@ -186,7 +204,7 @@ export default function Ai() {
     );
   };
 
-  const showInput = chat.supervisorState !== 'empty' && chat.supervisorState !== 'error';
+  const showInput = selection.state !== 'empty' && selection.state !== 'error';
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -195,7 +213,24 @@ export default function Ai() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <AiHeader />
+        {selection.supervisor && showInput && (
+          <SupervisorBar
+            supervisor={selection.supervisor}
+            disabled={chat.loading}
+            onPressSupervisor={() => setPickerOpen(true)}
+            onNewChat={chat.startNew}
+          />
+        )}
         {renderBody()}
+        {chat.restoreState === 'error' && chat.restoreError && (
+          // 복원에 실패해도 입력은 열려 있어 새 대화로 시작할 수 있다 (임시 디자인)
+          <View style={styles.restoreError}>
+            <Text style={styles.error}>{chat.restoreError}</Text>
+            <Pressable accessibilityRole="button" onPress={chat.reload} style={styles.retry}>
+              <Text style={styles.retryText}>{RESTORE_RETRY_LABEL}</Text>
+            </Pressable>
+          </View>
+        )}
         {showInput && (
           <ChatInputBar
             value={input}
@@ -207,6 +242,13 @@ export default function Ai() {
           />
         )}
       </KeyboardAvoidingView>
+      <SupervisorPickerModal
+        visible={pickerOpen}
+        supervisors={selection.supervisors}
+        selectedId={selection.supervisor?.id ?? null}
+        onSelect={selection.select}
+        onClose={() => setPickerOpen(false)}
+      />
     </View>
   );
 }
@@ -288,6 +330,14 @@ const styles = StyleSheet.create({
   retryText: {
     ...typography.action,
     color: colors.primaryDark,
+  },
+  restoreError: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
   },
   notice: {
     ...typography.body,

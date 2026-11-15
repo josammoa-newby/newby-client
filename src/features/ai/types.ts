@@ -16,3 +16,14 @@ export type AiAnswer = {
   // true 이면 카드 위에 안전 안내를 보여준다
   safetyFlag?: boolean;
 };
+
+// 대화 한 턴(사용자 질문 + AI 답변). 서버 메시지에서 복원한 턴도 같은 모양이다
+export type Turn = {
+  id: number;
+  question: string;
+  status: 'loading' | 'done' | 'error';
+  answer?: AiAnswer;
+  // 답변(AI 메시지) id. 피드백을 남길 때 쓴다
+  aiMessageId?: string;
+  error?: string;
+};
