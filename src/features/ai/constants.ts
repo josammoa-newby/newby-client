@@ -24,3 +24,10 @@ export const FEEDBACK_THANKS = '피드백 고마워요';
 export const FEEDBACK_ALREADY = '이미 피드백을 남겼어요';
 export const FEEDBACK_NEW_NOTE = '상사에 대해 새로 배웠어요: ';
 export const FEEDBACK_SCORE_ADJUSTED = '상사 성향 점수를 보정했어요';
+
+// 상사 선택 / 대화 복원 / 새 대화 (Figma에 없는 임시 문구)
+export const PICKER_TITLE = '상사 선택';
+export const DEFAULT_BADGE = '기본';
+export const NEW_CHAT_LABEL = '새 대화';
+export const RESTORING_MESSAGE = '대화를 불러오고 있어요';
+export const RESTORE_RETRY_LABEL = '다시 불러오기';

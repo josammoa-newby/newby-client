@@ -41,6 +41,12 @@ export type SendMessageResult = {
 // 서버 최악의 경우가 약 60초(내부 재질문 1회)라, 클라이언트가 먼저 끊어 화면과 서버 저장이 어긋나지 않게 65초로 한다.
 const SEND_MESSAGE_TIMEOUT_MS = 65000;
 
+export type ListSessionsParams = {
+  supervisorId: string;
+  // 1~50. 서버 기본값을 쓰려면 생략
+  limit?: number;
+};
+
 const sessionPath = (id: string) => `/api/sessions/${encodeURIComponent(id)}`;
 
 // 내 상사와의 상담 세션을 만들고 AI 첫 인사 메시지를 함께 받는다.
@@ -64,4 +70,12 @@ export function sendMessage(sessionId: string, text: string): Promise<SendMessag
 // 세션 정보와 메시지(시간순)
 export function getSession(sessionId: string): Promise<SessionWithMessages> {
   return request<SessionWithMessages>(sessionPath(sessionId), { auth: true });
+}
+
+// 상사별 세션 목록 (최신 먼저). 세션이 없으면 빈 배열
+export async function listSessions(params: ListSessionsParams): Promise<Session[]> {
+  const query = [`supervisorId=${encodeURIComponent(params.supervisorId)}`];
+  if (params.limit !== undefined) query.push(`limit=${params.limit}`);
+  const data = await request<{ sessions: Session[] }>(`/api/sessions?${query.join('&')}`, { auth: true });
+  return data.sessions;
 }
