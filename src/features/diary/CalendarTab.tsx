@@ -42,15 +42,24 @@ export function CalendarTab() {
         </View>
 
         <Text style={styles.month}>{formatMonthTitle(data.year, data.month)}</Text>
-        <CalendarGrid year={data.year} month={data.month} recordedDates={recordedDates} />
+        <CalendarGrid
+          year={data.year}
+          month={data.month}
+          recordedDates={recordedDates}
+          onPressDay={(date) => router.push({ pathname: '/diary-detail', params: { date } })}
+        />
       </ScrollView>
 
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="일기 쓰기"
-        // 이미 쓴 날은 동작하지 않는다 (날짜 상세 보기가 생기면 정리)
+        // 오늘 일기가 없으면 새로 쓰고, 이미 있으면 오늘 일기 상세로 간다
         onPress={() => {
-          if (!recordedDates.has(data.today)) router.push('/diary-write');
+          if (recordedDates.has(data.today)) {
+            router.push({ pathname: '/diary-detail', params: { date: data.today } });
+          } else {
+            router.push('/diary-write');
+          }
         }}
         style={styles.fab}
       >
