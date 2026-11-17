@@ -6,6 +6,11 @@ export const diaryColors = {
   fabShadow: 'rgba(0, 0, 0, 0.08)', // 캘린더 + 버튼 그림자 (Figma 19:1737)
 } as const;
 
+// 눌림 효과 (Figma에 디자인 없음, 임시값)
+export const diaryOpacity = {
+  pressed: 0.6,
+} as const;
+
 export const diaryLayout = {
   headerTop: 20, // 상태바 하단 ~ 로고 상단. 홈 헤더(homeLayout.headerTop)와 위치를 맞춤
   headerBottom: 13.5, // 로고 하단 ~ 탭 상단. 위쪽을 4 늘린 만큼 줄여서 아래 레이아웃은 Figma 위치 유지

@@ -14,10 +14,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button } from '@/components';
 import { colors, opacity, radius, size, spacing, typography } from '@/theme';
-import { DiaryLoading } from '../DiaryStatus';
+import { DiaryError, DiaryLoading } from '../DiaryStatus';
 import { AnalysisCard } from './AnalysisCard';
 import { MAX_CONTENT_LENGTH, MIN_ANALYZE_LENGTH, writeLayout } from './constants';
 import { MoodChips } from './MoodChips';
+import { RewardBanner } from './RewardBanner';
 import { useDiaryWrite } from './useDiaryWrite';
 
 const close = () => {
@@ -26,14 +27,20 @@ const close = () => {
 };
 
 // 일기 작성 → 저장 → AI 분석 결과. Figma 디자인이 없는 임시 UI (색·간격은 일기 화면 스타일을 따름)
-export function DiaryWriteScreen() {
+// editId 가 있으면 그 일기를 수정하는 모드 (날짜는 수정할 수 없다)
+export function DiaryWriteScreen({ editId }: { editId?: string }) {
   const insets = useSafeAreaInsets();
-  const w = useDiaryWrite();
+  const w = useDiaryWrite(editId);
+  const savedLabel = w.isEdit ? '일기가 수정됐어요' : '일기가 저장됐어요';
   const empty = w.trimmedLength === 0;
   const tooShort = !empty && w.trimmedLength < MIN_ANALYZE_LENGTH;
 
   let body: React.ReactNode;
-  if (w.phase === 'analyzing') {
+  if (w.loadState === 'loading') {
+    body = <DiaryLoading />;
+  } else if (w.loadState === 'error') {
+    body = <DiaryError message={w.loadError ?? ''} onRetry={w.reloadOriginal} />;
+  } else if (w.phase === 'analyzing') {
     body = <DiaryLoading message="AI가 일기를 읽고 있어요" />;
   } else if (w.phase === 'result' && w.analysis) {
     body = (
@@ -46,7 +53,7 @@ export function DiaryWriteScreen() {
   } else if (w.phase === 'analyzeFailed') {
     body = (
       <View style={styles.centered}>
-        <Text style={styles.message}>일기는 저장됐어요. 분석은 다시 시도할 수 있어요</Text>
+        <Text style={styles.message}>{`${savedLabel}. 분석은 다시 시도할 수 있어요`}</Text>
         {w.error && <Text style={styles.caption}>{w.error}</Text>}
         <Button title="분석 다시 시도" onPress={w.retryAnalyze} />
         <Pressable accessibilityRole="button" hitSlop={8} onPress={close}>
@@ -57,7 +64,7 @@ export function DiaryWriteScreen() {
   } else if (w.phase === 'tooShort') {
     body = (
       <View style={styles.centered}>
-        <Text style={styles.message}>일기가 저장됐어요</Text>
+        <Text style={styles.message}>{savedLabel}</Text>
         <Text style={styles.caption}>{`${MIN_ANALYZE_LENGTH}자 이상 쓰면 AI 분석을 받을 수 있어요`}</Text>
         <Button title="확인" onPress={close} />
       </View>
@@ -99,9 +106,9 @@ export function DiaryWriteScreen() {
 
           {w.error && <Text style={styles.error}>{w.error}</Text>}
           <Button
-            title="저장"
+            title={w.isEdit ? '수정 완료' : '저장'}
             loading={saving}
-            onPress={empty ? undefined : w.save}
+            onPress={empty ? undefined : () => void w.save().then((outcome) => outcome === 'unchanged' && close())}
             style={empty ? styles.disabled : undefined}
           />
         </ScrollView>
@@ -115,8 +122,9 @@ export function DiaryWriteScreen() {
         <Pressable accessibilityRole="button" accessibilityLabel="뒤로가기" hitSlop={16} onPress={close}>
           <Image source={require('../../../../assets/signup/back-arrow.svg')} style={styles.back} />
         </Pressable>
-        <Text style={styles.title}>일기 쓰기</Text>
+        <Text style={styles.title}>{w.isEdit ? '일기 수정' : '일기 쓰기'}</Text>
       </View>
+      {w.reward && <RewardBanner reward={w.reward} />}
       {body}
     </View>
   );

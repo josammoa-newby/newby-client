@@ -5,7 +5,8 @@ import { diaryColors } from '../constants';
 import { MOODS, type Mood } from './constants';
 
 type Props = {
-  value: Mood | null;
+  // 서버에 저장된 값이 MOODS 에 없어도 받을 수 있게 string (칩이 선택되지 않을 뿐)
+  value: string | null;
   onChange: (mood: Mood | null) => void;
 };
 

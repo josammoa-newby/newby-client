@@ -1,6 +1,7 @@
+import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { apiErrorMessage } from '@/api';
+import { apiErrorMessage, getMyStats } from '@/api';
 import type { Stats } from '@/api';
 import { generateTodayMissions, getTodayMissions, toggleMission } from './service';
 import type { Mission } from './types';
@@ -49,6 +50,23 @@ export function useMissions() {
   useEffect(() => {
     load();
   }, [load]);
+
+  // 일기 작성/삭제 등으로 바뀐 경험치를 반영하려고, 화면에 다시 포커스될 때 stats 만 조용히 다시 읽는다.
+  // 로딩 표시도, 미션 생성/재조회도 하지 않고 실패는 무시한다. 첫 진입은 load 가 이미 처리한다
+  const firstFocus = useRef(true);
+  useFocusEffect(
+    useCallback(() => {
+      if (firstFocus.current) {
+        firstFocus.current = false;
+        return;
+      }
+      getMyStats()
+        .then((stats) => {
+          if (mounted.current) setData((prev) => (prev ? { ...prev, stats } : prev));
+        })
+        .catch(() => {});
+    }, []),
+  );
 
   const patchMission = useCallback((id: string, patch: Partial<Mission>) => {
     setData((prev) =>
